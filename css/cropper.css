@@ -1,0 +1,128 @@
+/*
+	Reference Styling for an Image Cropper
+*/
+@media all {
+  /*
+  	cropper
+  */
+  figure.cropper {
+    background: #000;
+    border: solid 1px #333333;
+    display: inline-block;
+    position: relative;
+    margin: 0 10px 50px 0;
+    padding: 0;
+    vertical-align: bottom;
+  }
+  figure.cropper span.cr-busy {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=70);
+    opacity: 0.7;
+    background: black url(../img/busy_8.gif) no-repeat 50% 50%;
+    color: #fff;
+    height: 48px;
+    left: 50%;
+    margin: -24px;
+    overflow: hidden;
+    position: absolute;
+    text-indent: 50px;
+    white-space: nowrap;
+    top: 50%;
+    visibility: hidden;
+    width: 48px;
+    z-index: 10;
+  }
+  figure.cropper span.cr-overlay {
+    border: dotted 1px white;
+    cursor: move;
+    display: block;
+    position: absolute;
+    top: 10%;
+    right: 10%;
+    bottom: 10%;
+    left: 10%;
+  }
+  figure.cropper span.cr-overlay span {
+    background: rgba(255, 255, 255, 0.5);
+    background: #ccc\9;
+    border: solid 1px white;
+    display: block;
+    position: absolute;
+    margin: -8px;
+    width: 14px;
+    height: 14px;
+  }
+  figure.cropper span.cr-overlay span.cr-tl {
+    cursor: nw-resize;
+    left: 0%;
+    top: 0%;
+  }
+  figure.cropper span.cr-overlay span.cr-tc {
+    cursor: n-resize;
+    left: 50%;
+    top: 0%;
+  }
+  figure.cropper span.cr-overlay span.cr-tr {
+    cursor: ne-resize;
+    right: 0%;
+    top: 0%;
+  }
+  figure.cropper span.cr-overlay span.cr-ml {
+    cursor: w-resize;
+    left: 0%;
+    top: 50%;
+  }
+  figure.cropper span.cr-overlay span.cr-mr {
+    cursor: e-resize;
+    right: 0%;
+    top: 50%;
+  }
+  figure.cropper span.cr-overlay span.cr-bl {
+    cursor: sw-resize;
+    bottom: 0%;
+    left: 0%;
+  }
+  figure.cropper span.cr-overlay span.cr-bc {
+    cursor: s-resize;
+    bottom: 0%;
+    left: 50%;
+  }
+  figure.cropper span.cr-overlay span.cr-br {
+    cursor: se-resize;
+    bottom: 0%;
+    right: 0%;
+  }
+  figure.cropper img {
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+    opacity: 0.5;
+    display: block;
+    margin: auto;
+  }
+  figure.cropper figcaption {
+    display: block;
+    height: 30px;
+    width: 100%;
+    position: absolute;
+    bottom: -40px;
+    text-align: right;
+  }
+  figure.cropper figcaption button.cr-apply {
+    float: left;
+  }
+  figure.cropper figcaption button[disabled] {
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+    opacity: 0.5;
+  }
+  figure.cropper.cr-disabled span.cr-overlay {
+    visibility: hidden;
+  }
+  figure.cropper.cr-disabled img {
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+    opacity: 1;
+    display: block;
+  }
+}
