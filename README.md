@@ -42,12 +42,19 @@ useful.cropper.setup(parent, {
 ```
 
 **id : {string}** - The ID attribute of an element somewhere in the document.
+
 **parent : {DOM node}** - The DOM element around which the functionality is centred.
+
 **crop : {array}** - An array of default cropping coordinates as fractions from the left, top, right and bottom of the image.
+
 **minimum : {float}** - The smallest fraction of the image that is able to be cropped. This value should be large enough to avoid overlapping guides.
+
 **onchange : {function}** - An external function to call after every change to the cropping area.
+
 **delay : {integer}** - The time in miliseconds to wait before triggering the onchange function. This limits the rate at which the function is called.
+
 **offset : {integer}** - A fudge factor in pixels to compensate for slight alignment differences, usually caused by borders and paddings.
+
 **'slice' : {string}** - A webservice for resizing images. An example is provided as *./php/imageslice.php*.
 
 ### Using document.querySelectorAll
@@ -70,7 +77,9 @@ useful.css.select({
 ```
 
 **rule : {string}** - The CSS Rule for the intended target(s) of the script.
+
 **handler : {function}** - The public function that starts the script.
+
 **data : {object}** - Name-value pairs with configuration data.
 
 ### Using jQuery
