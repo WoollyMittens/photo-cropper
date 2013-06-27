@@ -2,6 +2,8 @@
 
 A visual touch interface for generating cropping coordinates.
 
+Try the <a href="http://www.woollymittens.nl/useful/default.php?url=cropper">cropper demo</a>.
+
 ## How to use the script
 
 The stylesheet is best included in the header of the document.
