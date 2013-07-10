@@ -34,7 +34,10 @@ This is the safest way of starting the script, but allows for only one target el
 ```javascript
 var parent = documentGetElementById('id');
 useful.cropper.setup(parent, {
-	'crop' : [0.1, 0.1, 0.9, 0.9],
+	'left' : 0.1,
+	'top' : 0.1,
+	'right' : 0.9,
+	'bottom' : 0.9,
 	'minimum' : 0.2,
 	'onchange' : function(){},
 	'delay' : 1000,
@@ -48,6 +51,14 @@ useful.cropper.setup(parent, {
 **parent : {DOM node}** - The DOM element around which the functionality is centred.
 
 **crop : {array}** - An array of default cropping coordinates as fractions from the left, top, right and bottom of the image.
+
+**left : {float}** - At what fraction from the left to crop the image. i.e. 0 is the extreme left side.
+
+**top : {float}** - At what fraction from the top to crop the image. i.e. 0 is the extreme top side.
+
+**right : {float}** - At what fraction from the right to crop the image. i.e. 1 is the extreme bottom side.
+
+**bottom : {float}** - At what fraction from the bottom to crop the image. i.e. 1 is the extreme right side.
 
 **minimum : {float}** - The smallest fraction of the image that is able to be cropped. This value should be large enough to avoid overlapping guides.
 
@@ -68,7 +79,10 @@ useful.css.select({
 	rule : 'figure.cropper',
 	handler : useful.cropper.setup,
 	data : {
-		'crop' : [0.1, 0.1, 0.9, 0.9],
+		'left' : 0.1,
+		'top' : 0.1,
+		'right' : 0.9,
+		'bottom' : 0.9,
 		'minimum' : 0.2,
 		'onchange' : function(){},
 		'delay' : 1000,
@@ -91,7 +105,10 @@ This method is similar to the previous one, but uses jQuery for processing the C
 ```javascript
 $('figure.cropper').each(function (index, element) {
 	useful.cropper.setup(element, {
-		'crop' : [0.1, 0.1, 0.9, 0.9],
+		'left' : 0.1,
+		'top' : 0.1,
+		'right' : 0.9,
+		'bottom' : 0.9,
 		'minimum' : 0.2,
 		'onchange' : function(){},
 		'delay' : 1000,

@@ -29,7 +29,7 @@
 			// store the image
 			settings.image = settings.parent.getElementsByTagName('img')[0];
 			// store the hidden field
-			settings.output = settings.parent.getElementsByTagName('input')[0];
+			settings.output = settings.parent.getElementsByTagName('input');
 			// validate presets
 			settings.onchange = settings.onchange || function () {};
 			settings.delay = settings.delay || 1000;
@@ -76,11 +76,14 @@
 					query.right = query.right || 1;
 					query.bottom = query.bottom || 1;
 					// store the cropping dimensions
-					settings.crop = [query.left, query.top, query.right, query.bottom];
+					settings.left = query.left;
+					settings.top = query.top;
+					settings.right = query.right;
+					settings.bottom = query.bottom;
 					// guess what the original dimensions could have been
 					width = settings.image.offsetWidth;
 					height = settings.image.offsetHeight;
-					aspect = (height / (settings.crop[3] - settings.crop[1])) / (width / (settings.crop[2] - settings.crop[0]));
+					aspect = (height / (settings.bottom - settings.top)) / (width / (settings.right - settings.left));
 					if (width > height) {
 						height = width * aspect;
 					} else {
@@ -112,13 +115,16 @@
 		},
 		update : function (settings) {
 			// refresh the hidden field
-			settings.output.value = settings.crop.join(',');
+			settings.output[0].value = settings.left;
+			settings.output[1].value = settings.top;
+			settings.output[2].value = settings.right;
+			settings.output[3].value = settings.bottom;
 			// redraw the indicator
 			cropper.indicator.update(settings);
 			// trigger external onchange event
 			clearTimeout(cropper.timeout);
 			cropper.timeout = setTimeout(function () {
-				settings.onchange(settings.output);
+				settings.onchange(settings.output[0]);
 			}, settings.delay);
 		},
 		busy : {
@@ -171,10 +177,10 @@
 				settings.width = settings.image.offsetWidth;
 				settings.height = settings.image.offsetHeight;
 				// convert the crop fractions into pixel values
-				left = settings.crop[0] * settings.width;
-				top = settings.crop[1] * settings.height;
-				right = settings.width - settings.crop[2] * settings.width;
-				bottom = settings.height - settings.crop[3] * settings.height;
+				left = settings.left * settings.width;
+				top = settings.top * settings.height;
+				right = settings.width - settings.right * settings.width;
+				bottom = settings.height - settings.bottom * settings.height;
 				// reposition the indicator
 				settings.overlay.style.left = left + 'px';
 				settings.overlay.style.top = top + 'px';
@@ -189,17 +195,17 @@
 				horizontal = (coords[0].move.x - coords[0].start.x) / settings.width;
 				vertical = (coords[0].move.y - coords[0].start.y) / settings.height;
 				// calculate the new crop fractions
-				left = settings.crop[0] + horizontal;
-				top = settings.crop[1] + vertical;
-				right = settings.crop[2] + horizontal;
-				bottom = settings.crop[3] + vertical;
+				left = settings.left + horizontal;
+				top = settings.top + vertical;
+				right = settings.right + horizontal;
+				bottom = settings.bottom + vertical;
 				// if all are within limits
 				if (left >= 0 && top >= 0 && right <= 1 && bottom <= 1 && left < right && top < bottom) {
 					// apply the movement to the crop fractions
-					settings.crop[0] = left;
-					settings.crop[1] = top;
-					settings.crop[2] = right;
-					settings.crop[3] = bottom;
+					settings.left = left;
+					settings.top = top;
+					settings.right = right;
+					settings.bottom = bottom;
 				}
 				// reset the start coordinates
 				coords[0].start.x = coords[0].move.x;
@@ -273,13 +279,13 @@
 					// measure the movement in fractions of the dimensions
 					horizontal = (coords[0].move.x - coords[0].start.x) / settings.width;
 					// calculate the new crop fractions
-					left = settings.crop[0] + horizontal;
-					right = settings.crop[2] + horizontal;
-					limit = settings.crop[2] - settings.minimum;
+					left = settings.left + horizontal;
+					right = settings.right + horizontal;
+					limit = settings.right - settings.minimum;
 					// if all are within limits
 					if (left >= 0 && left < limit) {
 						// apply the movement to the crop fractions
-						settings.crop[0] = left;
+						settings.left = left;
 					}
 					// reset the start coordinates
 					coords[0].start.x = coords[0].move.x;
@@ -291,13 +297,13 @@
 					// measure the movement in fractions of the dimensions
 					vertical = (coords[0].move.y - coords[0].start.y) / settings.height;
 					// calculate the new crop fractions
-					top = settings.crop[1] + vertical;
-					bottom = settings.crop[3] + vertical;
-					limit = settings.crop[3] - settings.minimum;
+					top = settings.top + vertical;
+					bottom = settings.bottom + vertical;
+					limit = settings.bottom - settings.minimum;
 					// if all are within limits
 					if (top >= 0 && top < limit) {
 						// apply the movement to the crop fractions
-						settings.crop[1] = top;
+						settings.top = top;
 					}
 					// reset the start coordinates
 					coords[0].start.y = coords[0].move.y;
@@ -309,13 +315,13 @@
 					// measure the movement in fractions of the dimensions
 					horizontal = (coords[0].move.x - coords[0].start.x) / settings.width;
 					// calculate the new crop fractions
-					left = settings.crop[0] + horizontal;
-					right = settings.crop[2] + horizontal;
-					limit = settings.crop[0] + settings.minimum;
+					left = settings.left + horizontal;
+					right = settings.right + horizontal;
+					limit = settings.left + settings.minimum;
 					// if all are within limits
 					if (right <= 1 && right > limit) {
 						// apply the movement to the crop fractions
-						settings.crop[2] = right;
+						settings.right = right;
 					}
 					// reset the start coordinates
 					coords[0].start.x = coords[0].move.x;
@@ -327,13 +333,13 @@
 					// measure the movement in fractions of the dimensions
 					vertical = (coords[0].move.y - coords[0].start.y) / settings.height;
 					// calculate the new crop fractions
-					top = settings.crop[1] + vertical;
-					bottom = settings.crop[3] + vertical;
-					limit = settings.crop[1] + settings.minimum;
+					top = settings.top + vertical;
+					bottom = settings.bottom + vertical;
+					limit = settings.top + settings.minimum;
 					// if all are within limits
 					if (bottom <= 1 && bottom > limit) {
 						// apply the movement to the crop fractions
-						settings.crop[3] = bottom;
+						settings.bottom = bottom;
 					}
 					// reset the start coordinates
 					coords[0].start.y = coords[0].move.y;
@@ -398,10 +404,10 @@
 				src = settings.image.src;
 				src = useful.urls.replace(src, 'width', width);
 				src = useful.urls.replace(src, 'height', height);
-				src = useful.urls.replace(src, 'left', settings.crop[0]);
-				src = useful.urls.replace(src, 'top', settings.crop[1]);
-				src = useful.urls.replace(src, 'right', settings.crop[2]);
-				src = useful.urls.replace(src, 'bottom', settings.crop[3]);
+				src = useful.urls.replace(src, 'left', settings.left);
+				src = useful.urls.replace(src, 'top', settings.top);
+				src = useful.urls.replace(src, 'right', settings.right);
+				src = useful.urls.replace(src, 'bottom', settings.bottom);
 				settings.image.src = src;
 				// disable the indicator
 				settings.applyButton.disabled = true;
@@ -753,6 +759,20 @@
 			data[namevalue[0]] = (!isNaN(value)) ? value : namevalue[1];
 		}
 		return data;
+	};
+	useful.urls.save = function (url, data) {
+		var name;
+		// clean the url
+		url = url.split('?')[0].split('#')[0];
+		// for all name value pairs
+		for (name in data) {
+			if (data.hasOwnProperty(name)) {
+				// add them to the url
+				url += '&' + name + '=' + data[name];
+			}
+		}
+		// make sure the first value starts with a ?
+		return url.replace('&', '?');
 	};
 	useful.urls.replace = function (url, name, value) {
 		var old, match, nameValue;

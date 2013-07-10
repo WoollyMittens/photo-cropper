@@ -5,9 +5,11 @@
 		<title>useful.cropper.js: Image Cropper</title>
 		<style>
 			html { font-family:Sans-Serif; font-size:75%; height:100%; }
-			body { _height:100%; line-height:180%; margin:0; min-height:100%; padding:0; }
-			.example { max-width:960px; margin:0 auto; padding:2em; }
-			.example-left, .example-right { max-width:480px; }
+			body { _height:100%; line-height:180%; margin:0; min-height:100%; padding:1%; }
+			.example { max-width:960px; margin:0 auto; padding:0; clear:both; }
+			.example > article, .example > aside { width:98%; padding:2%; }
+			.example-left > article, .example-left > aside { width:48%; padding:1%; float:left; }
+			.example-right > article, .example-right > aside { width:48%; padding:1%; float:right; }
 		</style>
 		<!--[if lte IE 9]>
 			<meta http-equiv="imagetoolbar" content="no"/>
@@ -30,24 +32,24 @@
 				<script src="./js/useful.cropper.js"></script>
 				<figure class="cropper">
 					<img alt="" src="./php/imageslice.php?src=../img/figure_0a.jpg&width=256&height=256&left=0&top=0&right=1&bottom=1"/>
-					<input name="crop0" type="hidden" value=""/>
+					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
 				</figure>
 				<figure class="cropper">
 					<img alt="" src="./php/imageslice.php?src=../img/figure_1a.jpg&width=256&height=128&left=0&top=0.25&right=1&bottom=0.75"/>
-					<input name="crop1" type="hidden" value=""/>
+					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
 				</figure>
 				<figure class="cropper">
 					<img alt="" src="./php/imageslice.php?src=../img/figure_2a.jpg&width=256&height=256&left=0&top=0&right=1&bottom=1"/>
-					<input name="crop2" type="hidden" value=""/>
+					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
 				</figure>
 				<!--
 				<figure class="cropper">
 					<img alt="" src="http://devssi.maxoom.com.au/erez/erez?src=webqem/xmas2009/P1000321.JPG&left=0.396875&top=0.1&right=0.9&bottom=0.9"/>
-					<input name="crop1" type="hidden" value=""/>
+					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
 				</figure>
 				<figure class="cropper">
 					<img alt="" src="http://devssi.maxoom.com.au/erez/erez?src=webqem/xmas2009/P1000329.JPG&left=0.40078125&top=0.1937500000000001&right=0.775&bottom=0.5979166666666668"/>
-					<input name="crop1" type="hidden" value=""/>
+					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
 				</figure>
 				-->
 				<script>
@@ -56,7 +58,10 @@
 						rule : 'figure.cropper',
 						handler : useful.cropper.setup,
 						data : {
-							'crop' : [0.1, 0.1, 0.9, 0.9],
+							'left' : 0.1,
+							'top' : 0.1,
+							'right' : 0.9,
+							'bottom' : 0.9,
 							'minimum' : 0.2,
 							'onchange' : function(){},
 							'delay' : 1000,
