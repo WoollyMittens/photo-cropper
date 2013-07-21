@@ -121,11 +121,6 @@
 			settings.output[3].value = settings.bottom;
 			// redraw the indicator
 			cropper.indicator.update(settings);
-			// trigger external onchange event
-			clearTimeout(cropper.timeout);
-			cropper.timeout = setTimeout(function () {
-				settings.onchange(settings.output[0]);
-			}, settings.delay);
 		},
 		busy : {
 			build : function (settings) {
@@ -412,6 +407,8 @@
 				// disable the indicator
 				settings.applyButton.disabled = true;
 				settings.parent.className = settings.parent.className.replace(' cr-disabled', '') + ' cr-disabled';
+				// trigger any external onchange event
+				settings.onchange(settings.output[0]);
 				// cancel the click
 				return false;
 			},
@@ -422,6 +419,11 @@
 				settings.image.onload = function () {
 					// undo the margin
 					settings.image.style.marginTop = 0;
+					// undo the values
+					settings.left = 0;
+					settings.top = 0;
+					settings.right = 1;
+					settings.bottom = 1;
 					// reset the indicator
 					cropper.update(settings);
 					// enable the indicator
@@ -433,6 +435,8 @@
 				// replace the image with an uncropped version
 				settings.image.src = settings.url;
 				settings.overlay.style.backgroundImage = 'url(' + settings.url + ')';
+				// trigger any external onchange event
+				settings.onchange(settings.output[0]);
 				// cancel the click
 				return false;
 			}
