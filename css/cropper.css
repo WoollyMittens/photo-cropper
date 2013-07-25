@@ -7,7 +7,7 @@
   */
   figure.cropper {
     background: #000;
-    border: solid 1px #333333;
+    border: solid 1px #333;
     display: inline-block;
     position: relative;
     margin: 0 10px 50px 0;
@@ -37,7 +37,7 @@
     z-index: 10;
   }
   figure.cropper span.cr-overlay {
-    border: dotted 1px white;
+    border: dotted 1px #fff;
     cursor: move;
     display: block;
     position: absolute;
@@ -48,8 +48,8 @@
   }
   figure.cropper span.cr-overlay span {
     background: rgba(255, 255, 255, 0.5);
-    background: #ccc\9;
-    border: solid 1px white;
+    background: #cccccc \9;
+    border: solid 1px #fff;
     display: block;
     position: absolute;
     margin: -8px;

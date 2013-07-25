@@ -1,12 +1,9 @@
 /*
 	Reference Styling for an Image Cropper
 */
-
 @media all {
-
 	@import "compass/css3";
 	@import "compass/utilities";
-
 	/*
 		cropper
 	*/
@@ -125,7 +122,6 @@
 			}
 		}
 	}
-
 }
 @media (min-width: 1200px) {}
 @media (min-width: 980px) and (max-width: 1199px) {}
