@@ -18,7 +18,7 @@ This include can be added to the header or placed inline before the script is in
 <script src="./js/useful.cropper.js"></script>
 ```
 
-To enable the use of HTML5 tags in Internet Explorer 8 and lower, include *html5.js*. To provide an alternative for *document.querySelectorAll* in Internet Explorer 8 and lower, include *jQuery*.
+To enable the use of HTML5 tags in Internet Explorer 8 and lower, include *html5.js*. To provide an alternative for *document.querySelectorAll* and CSS3 animations in Internet Explorer 8 and lower, include *jQuery*.
 
 ```html
 <!--[if lte IE 9]>
