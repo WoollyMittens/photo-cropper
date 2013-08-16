@@ -118,5 +118,13 @@ $('figure.cropper').each(function (index, element) {
 });
 ```
 
+## Prerequisites
+
+To concatenate and minify the script yourself, the following prerequisites are required:
++ https://github.com/WoollyMittens/useful-instances
++ https://github.com/WoollyMittens/useful-interactions
++ https://github.com/WoollyMittens/useful-polyfills
++ https://github.com/WoollyMittens/useful-urls.js
+
 ## License
 This work is licensed under a Creative Commons Attribution 3.0 Unported License. The latest version of this and other scripts by the same author can be found at http://www.woollymittens.nl/

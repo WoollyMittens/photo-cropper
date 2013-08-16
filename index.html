@@ -29,7 +29,6 @@
 
 				<!-- Cut below this -->
 				<style>@import url("./css/cropper.css")</style>
-				<script src="./js/useful.cropper.js"></script>
 				<figure class="cropper">
 					<img alt="" src="./php/imageslice.php?src=../img/figure_0a.jpg&width=256&height=256&left=0&top=0&right=1&bottom=1"/>
 					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
@@ -42,22 +41,14 @@
 					<img alt="" src="./php/imageslice.php?src=../img/figure_2a.jpg&width=256&height=256&left=0&top=0&right=1&bottom=1"/>
 					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
 				</figure>
-				<!--
-				<figure class="cropper">
-					<img alt="" src="http://devssi.maxoom.com.au/erez/erez?src=webqem/xmas2009/P1000321.JPG&left=0.396875&top=0.1&right=0.9&bottom=0.9"/>
-					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
-				</figure>
-				<figure class="cropper">
-					<img alt="" src="http://devssi.maxoom.com.au/erez/erez?src=webqem/xmas2009/P1000329.JPG&left=0.40078125&top=0.1937500000000001&right=0.775&bottom=0.5979166666666668"/>
-					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
-				</figure>
-				-->
+				<script src="./js/cropper.min.js"></script>
 				<script>
 				//<!--
-					useful.css.select({
-						rule : 'figure.cropper',
-						handler : useful.cropper.setup,
-						data : {
+					// create new instances of the script
+					var croppers = new useful.Instances(
+						document.querySelectorAll('figure.cropper'),
+						useful.Cropper,
+						{
 							'left' : 0.1,
 							'top' : 0.1,
 							'right' : 0.9,
@@ -68,7 +59,9 @@
 							'offset' : 2,
 							'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
 						}
-					});
+					);
+					// wait for the document to load and then start all instances
+					croppers.wait();
 				//-->
 				</script>
 				<!-- Cut above this -->
