@@ -4,7 +4,7 @@ A visual touch interface for generating cropping coordinates.
 
 Try the <a href="http://www.woollymittens.nl/useful/default.php?url=cropper">demo</a>.
 
-## How to use the script
+## How to include the script
 
 The stylesheet is best included in the header of the document.
 
@@ -15,7 +15,7 @@ The stylesheet is best included in the header of the document.
 This include can be added to the header or placed inline before the script is invoked.
 
 ```html
-<script src="./js/useful.cropper.js"></script>
+<script src="./js/cropper.min.js"></script>
 ```
 
 To enable the use of HTML5 tags in Internet Explorer 8 and lower, include *html5.js*. To provide an alternative for *document.querySelectorAll* and CSS3 animations in Internet Explorer 8 and lower, include *jQuery*.
@@ -27,13 +27,12 @@ To enable the use of HTML5 tags in Internet Explorer 8 and lower, include *html5
 <![endif]-->
 ```
 
-### Using vanilla JavaScript
+## How to start the script
 
 This is the safest way of starting the script, but allows for only one target element at a time.
 
 ```javascript
-var parent = documentGetElementById('id');
-useful.cropper.setup(parent, {
+var cropper = new useful.Cropper( document.getElementById('id'), {
 	'left' : 0.1,
 	'top' : 0.1,
 	'right' : 0.9,
@@ -44,11 +43,10 @@ useful.cropper.setup(parent, {
 	'offset' : 2,
 	'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
 });
+cropper.start();
 ```
 
 **id : {string}** - The ID attribute of an element somewhere in the document.
-
-**parent : {DOM node}** - The DOM element around which the functionality is centred.
 
 **crop : {array}** - An array of default cropping coordinates as fractions from the left, top, right and bottom of the image.
 
@@ -75,10 +73,10 @@ useful.cropper.setup(parent, {
 This method allows CSS Rules to be used to apply the script to one or more nodes at the same time.
 
 ```javascript
-useful.css.select({
-	rule : 'figure.cropper',
-	handler : useful.cropper.setup,
-	data : {
+var croppers = new useful.Instances(
+	document.querySelectorAll('figure.cropper'),
+	useful.Cropper,
+	{
 		'left' : 0.1,
 		'top' : 0.1,
 		'right' : 0.9,
@@ -89,22 +87,20 @@ useful.css.select({
 		'offset' : 2,
 		'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
 	}
-});
+);
+croppers.wait();
 ```
 
-**rule : {string}** - The CSS Rule for the intended target(s) of the script.
-
-**handler : {function}** - The public function that starts the script.
-
-**data : {object}** - Name-value pairs with configuration data.
+The "Instances" function clones the settings for each element in the CSS rule.
 
 ### Using jQuery
 
-This method is similar to the previous one, but uses jQuery for processing the CSS rule.
+This method is similar to the previous one, but uses jQuery for processing the CSS rule and cloning the settings.
 
 ```javascript
+var croppers = [];
 $('figure.cropper').each(function (index, element) {
-	useful.cropper.setup(element, {
+	croppers[index] = new useful.Cropper( element, {
 		'left' : 0.1,
 		'top' : 0.1,
 		'right' : 0.9,
@@ -115,8 +111,35 @@ $('figure.cropper').each(function (index, element) {
 		'offset' : 2,
 		'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
 	});
+	croppers[index].start();
 });
 ```
+
+## How to control the script
+
+### Update
+
+```javascript
+cropper.update({left:0.1, top:0.2, right:0.7, bottom:0.6});
+```
+
+Preset a crop setting.
+
+### Apply
+
+```javascript
+cropper.toolbar.apply(cropper);
+```
+
+Apply the cropping settings.
+
+### Reset
+
+```javascript
+cropper.toolbar.reset(cropper);
+```
+
+Reset the cropper.
 
 ## Prerequisites
 

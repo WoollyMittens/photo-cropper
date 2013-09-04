@@ -105,14 +105,19 @@
 				}
 			}
 		};
-		this.update = function (context) {
-			// refresh the hidden field
-			context.cfg.output[0].value = context.cfg.left;
-			context.cfg.output[1].value = context.cfg.top;
-			context.cfg.output[2].value = context.cfg.right;
-			context.cfg.output[3].value = context.cfg.bottom;
+		this.update = function (values) {
+			// process any override values
+			if(values && values.left) { this.cfg.left = values.left; };
+			if(values && values.top) { this.cfg.top = values.top; };
+			if(values && values.right) { this.cfg.right = values.right; };
+			if(values && values.bottom) { this.cfg.bottom = values.bottom; };
+			// refresh the hidden fields
+			this.cfg.output[0].value = this.cfg.left;
+			this.cfg.output[1].value = this.cfg.top;
+			this.cfg.output[2].value = this.cfg.right;
+			this.cfg.output[3].value = this.cfg.bottom;
 			// redraw the indicator
-			context.indicator.update(context);
+			this.indicator.update(this);
 		};
 		// busy
 		this.busy = {};

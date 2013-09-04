@@ -4,6 +4,8 @@
 @media all {
 	@import "compass/css3";
 	@import "compass/utilities";
+	@import "_definitions";
+	@import "_buttons";
 	/*
 		cropper
 	*/
@@ -109,7 +111,7 @@
 			}
 			button.cr-reset {}
 			button[disabled] {
-				@include opacity(0.5);
+				background-color : $color-disabled;
 			}
 		}
 		&.cr-disabled {
