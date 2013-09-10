@@ -40,6 +40,7 @@ var cropper = new useful.Cropper( document.getElementById('id'), {
 	'minimum' : 0.2,
 	'onchange' : function(){},
 	'delay' : 1000,
+	'realtime' : false,
 	'offset' : 2,
 	'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
 });
@@ -64,6 +65,8 @@ cropper.start();
 
 **delay : {integer}** - The time in miliseconds to wait before triggering the onchange function. This limits the rate at which the function is called.
 
+**realtime : {boolean}** - Turns on realtime updating of the values. The buttons are unnecessary in that case.
+
 **offset : {integer}** - A fudge factor in pixels to compensate for slight alignment differences, usually caused by borders and paddings.
 
 **'slice' : {string}** - A webservice for resizing images. An example is provided as *./php/imageslice.php*.
@@ -84,6 +87,7 @@ var croppers = new useful.Instances(
 		'minimum' : 0.2,
 		'onchange' : function(){},
 		'delay' : 1000,
+		'realtime' : false,
 		'offset' : 2,
 		'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
 	}
@@ -108,6 +112,7 @@ $('figure.cropper').each(function (index, element) {
 		'minimum' : 0.2,
 		'onchange' : function(){},
 		'delay' : 1000,
+		'realtime' : false,
 		'offset' : 2,
 		'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
 	});

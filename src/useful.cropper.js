@@ -20,11 +20,14 @@
 			var context = this;
 			// store the image
 			context.cfg.image = context.obj.getElementsByTagName('img')[0];
-			// store the hidden field
+			// store the hidden fields
 			context.cfg.output = context.obj.getElementsByTagName('input');
+			context.cfg.values = {};
 			// validate presets
 			context.cfg.onchange = context.cfg.onchange || function () {};
 			context.cfg.delay = context.cfg.delay || 1000;
+			context.cfg.timeout = null;
+			context.cfg.realtime = context.cfg.realtime || false;
 			context.cfg.minimum = context.cfg.minimum || 0.2;
 			context.cfg.crop = context.cfg.crop || [0.1, 0.1, 0.9, 0.9];
 			context.cfg.url = context.cfg.image.src;
@@ -34,7 +37,9 @@
 			// build the indicator
 			context.indicator.build(context);
 			// build the toolbar
-			context.toolbar.build(context);
+			if (!context.cfg.realtime) {
+				context.toolbar.build(context);
+			}
 			// ask the indicator to update after the image loads
 			context.loaded(context);
 		};
@@ -97,27 +102,52 @@
 					// restore the container's original size
 					context.obj.style.width = width + 'px';
 					context.obj.style.height = height + 'px';
-					// set the image to center
-					context.cfg.image.style.marginTop = Math.round((context.obj.offsetHeight - context.cfg.image.offsetHeight - context.cfg.offset) / 2) + 'px';
-					// disable the indicator
-					context.cfg.applyButton.disabled = true;
-					context.obj.className = context.obj.className.replace(' cr-disabled', '') + ' cr-disabled';
+					// if continuous updates are on
+					if (context.cfg.realtime) {
+						// load the original image
+						context.cfg.image.src = context.cfg.url;
+						context.cfg.overlay.style.background = 'url(' + context.cfg.url + ')';
+						// redraw the interface
+						context.update();
+					} else {
+						// set the image to center
+						context.cfg.image.style.marginTop = Math.round((context.obj.offsetHeight - context.cfg.image.offsetHeight - context.cfg.offset) / 2) + 'px';
+						// disable the indicator
+						context.cfg.applyButton.disabled = true;
+						context.obj.className = context.obj.className.replace(' cr-disabled', '') + ' cr-disabled';
+					}
 				}
 			}
 		};
-		this.update = function (values) {
+		this.update = function (values, changed) {
+			var context = this;
+			changed = (changed === true);
 			// process any override values
-			if(values && values.left) { this.cfg.left = values.left; };
-			if(values && values.top) { this.cfg.top = values.top; };
-			if(values && values.right) { this.cfg.right = values.right; };
-			if(values && values.bottom) { this.cfg.bottom = values.bottom; };
+			if (values && values.left) { this.cfg.left = values.left; }
+			if (values && values.top) { this.cfg.top = values.top; }
+			if (values && values.right) { this.cfg.right = values.right; }
+			if (values && values.bottom) { this.cfg.bottom = values.bottom; }
 			// refresh the hidden fields
 			this.cfg.output[0].value = this.cfg.left;
 			this.cfg.output[1].value = this.cfg.top;
 			this.cfg.output[2].value = this.cfg.right;
 			this.cfg.output[3].value = this.cfg.bottom;
+			// refresh the json object of values
+			this.cfg.values = {
+				'left' : this.cfg.left,
+				'top' : this.cfg.top,
+				'right' : this.cfg.right,
+				'bottom' : this.cfg.bottom
+			};
 			// redraw the indicator
 			this.indicator.update(this);
+			// update the onchange event periodically
+			if (changed && context.cfg.realtime) {
+				clearTimeout(context.cfg.timeout);
+				context.cfg.timeout = setTimeout(function () {
+					context.cfg.onchange(context.cfg.values);
+				}, context.cfg.delay);
+			}
 		};
 		// busy
 		this.busy = {};
@@ -204,7 +234,7 @@
 			coords[0].start.x = coords[0].move.x;
 			coords[0].start.y = coords[0].move.y;
 			// update the display
-			context.update(context);
+			context.update(context, true);
 		};
 		// indicator handles
 		this.indicator.handles = {};
@@ -212,7 +242,7 @@
 			var a, b, name;
 			// create the handles
 			context.cfg.handles = {};
-			for (a = 0 , b = context.names.length; a < b; a += 1) {
+			for (a = 0, b = context.names.length; a < b; a += 1) {
 				name = context.names[a];
 				context.cfg.handles[name] = document.createElement('span');
 				context.cfg.handles[name].className = 'cr-' + name;
@@ -284,7 +314,7 @@
 			// reset the start coordinates
 			coords[0].start.x = coords[0].move.x;
 			// update the display
-			context.update(context);
+			context.update(context, true);
 		};
 		this.indicator.handles.top = function (context, coords) {
 			var vertical, top, bottom, limit;
@@ -302,7 +332,7 @@
 			// reset the start coordinates
 			coords[0].start.y = coords[0].move.y;
 			// update the display
-			context.update(context);
+			context.update(context, true);
 		};
 		this.indicator.handles.right = function (context, coords) {
 			var horizontal, left, right, limit;
@@ -320,7 +350,7 @@
 			// reset the start coordinates
 			coords[0].start.x = coords[0].move.x;
 			// update the display
-			context.update(context);
+			context.update(context, true);
 		};
 		this.indicator.handles.bottom = function (context, coords) {
 			var vertical, top, bottom, limit;
@@ -338,7 +368,7 @@
 			// reset the start coordinates
 			coords[0].start.y = coords[0].move.y;
 			// update the display
-			context.update(context);
+			context.update(context, true);
 		};
 		// toolbar
 		this.toolbar = {};
@@ -367,11 +397,12 @@
 			context.obj.appendChild(context.cfg.toolbar);
 		};
 		this.toolbar.apply = function (context) {
-			var src, width, height;
+			var src, width, height, aspect;
 			// normalise the dimensions
 			width = context.cfg.overlay.offsetWidth;
 			height = context.cfg.overlay.offsetHeight;
-			if (width > height) {
+			aspect = context.obj.offsetHeight / context.obj.offsetWidth;
+			if (height / width < aspect) {
 				height = context.cfg.image.offsetWidth / width * context.cfg.overlay.offsetHeight;
 				width = context.cfg.image.offsetWidth;
 			} else {
@@ -406,7 +437,7 @@
 			context.cfg.applyButton.disabled = true;
 			context.obj.className = context.obj.className.replace(' cr-disabled', '') + ' cr-disabled';
 			// trigger any external onchange event
-			context.cfg.onchange(context.cfg.output[0]);
+			context.cfg.onchange(context.cfg.values);
 			// cancel the click
 			return false;
 		};
@@ -434,7 +465,7 @@
 			context.cfg.image.src = context.cfg.url;
 			context.cfg.overlay.style.backgroundImage = 'url(' + context.cfg.url + ')';
 			// trigger any external onchange event
-			context.cfg.onchange(context.cfg.output[0]);
+			context.cfg.onchange(context.cfg.values);
 			// cancel the click
 			return false;
 		};

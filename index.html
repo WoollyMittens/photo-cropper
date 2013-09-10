@@ -23,6 +23,10 @@
 			<article>
 				<h2>Image Cropper</h2>
 				<p>A visual touch interface for generating cropping coordinates.</p>
+				<p><a class="button downloadButton" href="http://github.com/WoollyMittens/useful-cropper" target="_blank">Download (GitHub)</a></p>
+			</article>
+			<aside>
+
 				<p>
 					<!-- externally set crop coordinates -->
 					<a href="#" onclick="var cropper = croppers.getByIndex(0); cropper.update({left:0.1, top:0.2, right:0.7, bottom:0.6});">Preset a crop</a> |
@@ -31,9 +35,6 @@
 					<!-- externally reset the interface -->
 					<a href="#" onclick="var cropper = croppers.getByIndex(0); cropper.toolbar.reset(cropper);">Reset the interface</a>
 				</p>
-				<p><a class="button downloadButton" href="http://github.com/WoollyMittens/useful-cropper" target="_blank">Download (GitHub)</a></p>
-			</article>
-			<aside>
 
 				<!-- Cut below this -->
 				<style>@import url("./css/cropper.css")</style>
@@ -64,6 +65,7 @@
 							'minimum' : 0.2,
 							'onchange' : function(){},
 							'delay' : 1000,
+							'realtime' : false,
 							'offset' : 2,
 							'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
 						}
