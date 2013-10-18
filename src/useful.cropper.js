@@ -47,20 +47,20 @@
 			// if the image has loaded
 			if (context.cfg.image.offsetWidth > 0 && context.cfg.image.offsetHeight > 0) {
 				// update the indicator
-				context.update(context);
-				context.preset(context);
+				context.update();
+				context.preset();
 			// else
 			} else {
 				// wait for the image to load
 				context.cfg.image.onload = function () {
 					// update the indicator
-					context.update(context);
-					context.preset(context);
+					context.update();
+					context.preset();
 				};
 			}
 		};
-		this.preset = function (context) {
-			var query, width, height, aspect;
+		this.preset = function () {
+			var context = this, query, width, height, aspect;
 			// if there's anything to measure yet
 			if (context.cfg.image.offsetWidth) {
 				// retrieve the crop coordinates from the url
@@ -78,17 +78,12 @@
 					context.cfg.right = query.right;
 					context.cfg.bottom = query.bottom;
 					// guess what the original dimensions could have been
-					width = context.cfg.image.offsetWidth;
-					height = context.cfg.image.offsetHeight;
-					aspect = (height / (context.cfg.bottom - context.cfg.top)) / (width / (context.cfg.right - context.cfg.left));
-					if (width > height) {
-						height = width * aspect;
-					} else {
-						width = height / aspect;
-					}
-					// round the numbers
-					width = Math.round(width);
-					height = Math.round(height);
+					width = context.cfg.image.offsetWidth / (context.cfg.right - context.cfg.left);
+					height = context.cfg.image.offsetHeight / (context.cfg.bottom - context.cfg.top);
+					aspect = height / width;
+					// scale to the available space
+					width = context.obj.offsetWidth;
+					height = Math.round(width * aspect);
 					// limit the image's size to the original parent
 					context.cfg.image.style.maxWidth = width + 'px';
 					context.cfg.image.style.maxHeight = height + 'px';
@@ -105,10 +100,9 @@
 					// if continuous updates are on
 					if (context.cfg.realtime) {
 						// load the original image
+						context.cfg.image.onload = function () { context.update(); };
 						context.cfg.image.src = context.cfg.url;
 						context.cfg.overlay.style.background = 'url(' + context.cfg.url + ')';
-						// redraw the interface
-						context.update();
 					} else {
 						// set the image to center
 						context.cfg.image.style.marginTop = Math.round((context.obj.offsetHeight - context.cfg.image.offsetHeight - context.cfg.offset) / 2) + 'px';
