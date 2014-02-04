@@ -173,20 +173,47 @@
 			// add the indicator to the parent
 			context.obj.appendChild(context.cfg.overlay);
 			// add the interaction
-			context.cfg.moving = false;
-			useful.interactions.watch(context.cfg.overlay, {
-				'start' : function () {
-					context.cfg.moving = true;
-				},
-				'end' : function () {
-					context.cfg.moving = false;
-				},
-				'move' : function (coords) {
-					if (!context.cfg.sizing) {
-						context.indicator.move(context, coords);
+			var gestures = new useful.Gestures(context.cfg.overlay.parentNode, {
+				'threshold' : 50,
+				'increment' : 0.1,
+				'cancelTouch' : true,
+				'cancelGesture' : true,
+				'drag' : function (metrics) {
+					switch (metrics.source.className) {
+					case 'cr-tl' :
+						context.indicator.handles.left(context, metrics.horizontal);
+						context.indicator.handles.top(context, metrics.vertical);
+						break;
+					case 'cr-tc' :
+						context.indicator.handles.top(context, metrics.vertical);
+						break;
+					case 'cr-tr' :
+						context.indicator.handles.right(context, metrics.horizontal);
+						context.indicator.handles.top(context, metrics.vertical);
+						break;
+					case 'cr-ml' :
+						context.indicator.handles.left(context, metrics.horizontal);
+						break;
+					case 'cr-mr' :
+						context.indicator.handles.right(context, metrics.horizontal);
+						break;
+					case 'cr-bl' :
+						context.indicator.handles.left(context, metrics.horizontal);
+						context.indicator.handles.bottom(context, metrics.vertical);
+						break;
+					case 'cr-bc' :
+						context.indicator.handles.bottom(context, metrics.vertical);
+						break;
+					case 'cr-br' :
+						context.indicator.handles.right(context, metrics.horizontal);
+						context.indicator.handles.bottom(context, metrics.vertical);
+						break;
+					default :
+						context.indicator.move(context, metrics.horizontal, metrics.vertical);
 					}
 				}
 			});
+			gestures.start();
 		};
 		this.indicator.update = function (context) {
 			var left, top, right, bottom;
@@ -206,11 +233,11 @@
 			// reposition the background image
 			context.cfg.overlay.style.backgroundPosition = '-' + left + 'px -' + top + 'px';
 		};
-		this.indicator.move = function (context, coords) {
+		this.indicator.move = function (context, x, y) {
 			var horizontal, vertical, left, top, right, bottom;
 			// measure the movement in fractions of the dimensions
-			horizontal = (coords[0].move.x - coords[0].start.x) / context.cfg.width;
-			vertical = (coords[0].move.y - coords[0].start.y) / context.cfg.height;
+			horizontal = x / context.cfg.width;
+			vertical = y / context.cfg.height;
 			// calculate the new crop fractions
 			left = context.cfg.left + horizontal;
 			top = context.cfg.top + vertical;
@@ -224,9 +251,6 @@
 				context.cfg.right = right;
 				context.cfg.bottom = bottom;
 			}
-			// reset the start coordinates
-			coords[0].start.x = coords[0].move.x;
-			coords[0].start.y = coords[0].move.y;
 			// update the display
 			context.update(context, true);
 		};
@@ -242,60 +266,13 @@
 				context.cfg.handles[name].className = 'cr-' + name;
 				context.cfg.overlay.appendChild(context.cfg.handles[name]);
 				// event handlers for moving the handle
-				context.cfg.sizing = false;
-				context.indicator.handles.move(context, name);
+				// NOTE: the parent element will handle the touch event
 			}
 		};
-		this.indicator.handles.move = function (context, name) {
-			// event handlers for moving the handle
-			useful.interactions.watch(context.cfg.handles[name], {
-				'start' : function () {
-					context.cfg.sizing = true;
-				},
-				'end' : function () {
-					context.cfg.sizing = false;
-				},
-				'move' : function (coords) {
-					// pick appropriate rules for the handle
-					switch (name) {
-					case 'tl' :
-						context.indicator.handles.left(context, coords);
-						context.indicator.handles.top(context, coords);
-						break;
-					case 'tc' :
-						context.indicator.handles.top(context, coords);
-						break;
-					case 'tr' :
-						context.indicator.handles.right(context, coords);
-						context.indicator.handles.top(context, coords);
-						break;
-					case 'ml' :
-						context.indicator.handles.left(context, coords);
-						break;
-					case 'mr' :
-						context.indicator.handles.right(context, coords);
-						break;
-					case 'bl' :
-						context.indicator.handles.left(context, coords);
-						context.indicator.handles.bottom(context, coords);
-						break;
-					case 'bc' :
-						context.indicator.handles.bottom(context, coords);
-						break;
-					case 'br' :
-						context.indicator.handles.right(context, coords);
-						context.indicator.handles.bottom(context, coords);
-						break;
-					}
-					// cancel touch shenanigans
-					return false;
-				}
-			});
-		};
-		this.indicator.handles.left = function (context, coords) {
+		this.indicator.handles.left = function (context, distance) {
 			var horizontal, left, right, limit;
 			// measure the movement in fractions of the dimensions
-			horizontal = (coords[0].move.x - coords[0].start.x) / context.cfg.width;
+			horizontal = distance / context.cfg.width;
 			// calculate the new crop fractions
 			left = context.cfg.left + horizontal;
 			right = context.cfg.right + horizontal;
@@ -305,15 +282,13 @@
 				// apply the movement to the crop fractions
 				context.cfg.left = left;
 			}
-			// reset the start coordinates
-			coords[0].start.x = coords[0].move.x;
 			// update the display
 			context.update(context, true);
 		};
-		this.indicator.handles.top = function (context, coords) {
+		this.indicator.handles.top = function (context, distance) {
 			var vertical, top, bottom, limit;
 			// measure the movement in fractions of the dimensions
-			vertical = (coords[0].move.y - coords[0].start.y) / context.cfg.height;
+			vertical = distance / context.cfg.height;
 			// calculate the new crop fractions
 			top = context.cfg.top + vertical;
 			bottom = context.cfg.bottom + vertical;
@@ -323,15 +298,13 @@
 				// apply the movement to the crop fractions
 				context.cfg.top = top;
 			}
-			// reset the start coordinates
-			coords[0].start.y = coords[0].move.y;
 			// update the display
 			context.update(context, true);
 		};
-		this.indicator.handles.right = function (context, coords) {
+		this.indicator.handles.right = function (context, distance) {
 			var horizontal, left, right, limit;
 			// measure the movement in fractions of the dimensions
-			horizontal = (coords[0].move.x - coords[0].start.x) / context.cfg.width;
+			horizontal = distance / context.cfg.width;
 			// calculate the new crop fractions
 			left = context.cfg.left + horizontal;
 			right = context.cfg.right + horizontal;
@@ -341,15 +314,13 @@
 				// apply the movement to the crop fractions
 				context.cfg.right = right;
 			}
-			// reset the start coordinates
-			coords[0].start.x = coords[0].move.x;
 			// update the display
 			context.update(context, true);
 		};
-		this.indicator.handles.bottom = function (context, coords) {
+		this.indicator.handles.bottom = function (context, distance) {
 			var vertical, top, bottom, limit;
 			// measure the movement in fractions of the dimensions
-			vertical = (coords[0].move.y - coords[0].start.y) / context.cfg.height;
+			vertical = distance / context.cfg.height;
 			// calculate the new crop fractions
 			top = context.cfg.top + vertical;
 			bottom = context.cfg.bottom + vertical;
@@ -359,8 +330,6 @@
 				// apply the movement to the crop fractions
 				context.cfg.bottom = bottom;
 			}
-			// reset the start coordinates
-			coords[0].start.y = coords[0].move.y;
 			// update the display
 			context.update(context, true);
 		};
