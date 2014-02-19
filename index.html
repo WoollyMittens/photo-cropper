@@ -37,20 +37,20 @@
 				</p>
 
 				<!-- Cut below this -->
-				<style>@import url("./css/useful-cropper.css")</style>
+				<style>@import url("./inc/css/useful-cropper.css")</style>
 				<figure class="cropper">
-					<img alt="" src="./php/imageslice.php?src=../img/figure_0a.jpg&width=256&height=256&left=0&top=0&right=1&bottom=1"/>
+					<img alt="" src="inc/php/imageslice.php?src=../../inc/img/figure_0a.jpg&width=256&height=256&left=0&top=0&right=1&bottom=1"/>
 					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
 				</figure>
 				<figure class="cropper">
-					<img alt="" src="./php/imageslice.php?src=../img/figure_1a.jpg&width=256&height=128&left=0&top=0.25&right=1&bottom=0.75"/>
+					<img alt="" src="inc/php/imageslice.php?src=../../inc/img/figure_1a.jpg&width=256&height=128&left=0&top=0.25&right=1&bottom=0.75"/>
 					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
 				</figure>
 				<figure class="cropper">
-					<img alt="" src="./php/imageslice.php?src=../img/figure_2a.jpg&width=256&height=256&left=0&top=0&right=1&bottom=1"/>
+					<img alt="" src="inc/php/imageslice.php?src=../../inc/img/figure_2a.jpg&width=256&height=256&left=0&top=0&right=1&bottom=1"/>
 					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
 				</figure>
-				<script src="./js/useful-cropper.js"></script>
+				<script src="./inc/js/useful-cropper.js"></script>
 				<script>
 				//<!--
 					// create new instances of the script
@@ -67,7 +67,7 @@
 							'delay' : 1000,
 							'realtime' : false,
 							'offset' : 2,
-							'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
+							'slice' : 'inc/php/imageslice.php?src=../../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
 						}
 					);
 					// wait for the document to load and then start all instances
