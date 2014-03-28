@@ -36,8 +36,10 @@
 			for (var a = 0, b = this.objs.length; a < b; a += 1) {
 				// store a constructed instance with cloned cfgs object
 				this.constructs[a] = new this.constructor(this.objs[a], Object.create(this.cfgs));
-				this.constructs[a].start();
 			}
+			// disable the start function so it can't be started twice
+			this.start = function () {};
+			// empty the timeout
 			return null;
 		};
 		// returns the constructs
@@ -52,6 +54,8 @@
 		this.getByIndex = function (index) {
 			return this.constructs[index];
 		};
+		// go
+		this.wait();
 	};
 
 }(window.useful = window.useful || {}));

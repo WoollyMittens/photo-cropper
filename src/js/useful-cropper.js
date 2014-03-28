@@ -42,6 +42,8 @@
 			}
 			// ask the indicator to update after the image loads
 			context.loaded(context);
+			// disable the start function so it can't be started twice
+			this.start = function () {};
 		};
 		this.loaded = function (context) {
 			// if the image has loaded
@@ -213,7 +215,6 @@
 					}
 				}
 			});
-			gestures.start();
 		};
 		this.indicator.update = function (context) {
 			var left, top, right, bottom;
@@ -432,6 +433,8 @@
 			// cancel the click
 			return false;
 		};
+		// go
+		this.start();
 	};
 
 }(window.useful = window.useful || {}));

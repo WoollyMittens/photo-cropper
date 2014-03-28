@@ -44,6 +44,8 @@
 			this.obj.addEventListener('msgesturestart', this.onStartGesture());
 			this.obj.addEventListener('msgesturechange', this.onChangeGesture());
 			this.obj.addEventListener('msgestureend', this.onEndGesture());
+			// disable the start function so it can't be started twice
+			this.start = function () {};
 		};
 		this.checkConfig = function (config) {
 			// add default values for missing ones
@@ -60,6 +62,12 @@
 			config.drag = config.drag || function () {};
 			config.pinch = config.pinch || function () {};
 			config.twist = config.twist || function () {};
+		};
+		this.readEvent = function (event, dimension) {
+			switch (dimension) {
+				case 'y' : return event.y || (event.touches && event.touches[0].pageY) || event.pageY || event.layerY + offsets.y;
+				default : return event.x || (event.touches && event.touches[0].pageX) || event.pageX || event.layerX + offsets.x;
+			}
 		};
 		this.correctOffset = function (element) {
 			var offsetX = 0, offsetY = 0;
@@ -86,8 +94,8 @@
 			var offsets = this.correctOffset(event.target || event.srcElement);
 			// note the start position
 			this.touchOrigin = {
-				'x' : event.x || event.layerX + offsets.x || event.pageX || event.touches[0].pageX,
-				'y' : event.y || event.layerY + offsets.y || event.pageY || event.touches[0].pageY,
+				'x' : this.readEvent(event, 'x'),
+				'y' : this.readEvent(event, 'y'),
 				'target' : event.target || event.srcElement
 			};
 			this.touchProgression = {
@@ -100,8 +108,8 @@
 			if (this.touchOrigin) {
 				// get the offset if the target shifts
 				var offsets = this.correctOffset(event.target || event.srcElement),
-					x = event.x || event.layerX + offsets.x || event.pageX || event.touches[0].pageX,
-					y = event.y || event.layerY + offsets.y || event.pageY || event.touches[0].pageY;
+					x = this.readEvent(event, 'x'),
+					y = this.readEvent(event, 'y');
 				// get the gesture parameters
 				this.cfg.drag({
 					'x' : this.touchOrigin.x,
@@ -194,15 +202,15 @@
 					rotation = event.rotation;
 				// get the gesture parameters
 				this.cfg.pinch({
-					'x' : event.x || event.layerX || event.pageX || event.touches[0].pageX,
-					'y' : event.y || event.layerY || event.pageY || event.touches[0].pageY,
+					'x' : this.readEvent(event, 'x'),
+					'y' : this.readEvent(event, 'y'),
 					'scale' : scale - this.gestureProgression.scale,
 					'event' : event,
 					'target' : this.gestureOrigin.target
 				});
 				this.cfg.twist({
-					'x' : event.x || event.layerX || event.pageX || event.touches[0].pageX,
-					'y' : event.y || event.layerY || event.pageY || event.touches[0].pageY,
+					'x' : this.readEvent(event, 'x'),
+					'y' : this.readEvent(event, 'y'),
 					'rotation' : rotation - this.gestureProgression.rotation,
 					'event' : event,
 					'target' : this.gestureOrigin.target
@@ -226,8 +234,6 @@
 			return function (event) {
 				// get event object
 				event = event || window.event;
-				// optionally cancel the default behaviour
-				context.cancelTouch(event);
 				// handle the event
 				context.startTouch(event);
 				context.changeTouch(event);
@@ -253,8 +259,6 @@
 			return function (event) {
 				// get event object
 				event = event || window.event;
-				// optionally cancel the default behaviour
-				context.cancelTouch(event);
 				// handle the event
 				context.endTouch(event);
 			};
@@ -308,8 +312,6 @@
 			return function (event) {
 				// get event object
 				event = event || window.event;
-				// optionally cancel the default behaviour
-				context.cancelGesture(event);
 				// handle the event
 				context.endGesture(event);
 			};
@@ -327,6 +329,8 @@
 		this.disableDefaultGesture = function () {
 			this.cfg.cancelGesture = true;
 		};
+		// go
+		this.start();
 	};
 
 }(window.useful = window.useful || {}));
@@ -369,8 +373,10 @@
 			for (var a = 0, b = this.objs.length; a < b; a += 1) {
 				// store a constructed instance with cloned cfgs object
 				this.constructs[a] = new this.constructor(this.objs[a], Object.create(this.cfgs));
-				this.constructs[a].start();
 			}
+			// disable the start function so it can't be started twice
+			this.start = function () {};
+			// empty the timeout
 			return null;
 		};
 		// returns the constructs
@@ -385,6 +391,8 @@
 		this.getByIndex = function (index) {
 			return this.constructs[index];
 		};
+		// go
+		this.wait();
 	};
 
 }(window.useful = window.useful || {}));
@@ -467,7 +475,8 @@
 
 	// allow console.log
 	polyfills.consoleLog = function () {
-		if (!window.console) {
+		var overrideTest = new RegExp('console-log', 'i');
+		if (!window.console || overrideTest.test(document.querySelectorAll('html')[0].className)) {
 			window.console = {};
 			window.console.log = function () {
 				// if the reporting panel doesn't exist
@@ -498,6 +507,8 @@
 				for (a = 0, b = arguments.length; a < b; a += 1) {
 					messages += arguments[a] + '<br/>';
 				}
+				// add a break after the message
+				messages += '<hr/>';
 				// output the queue to the panel
 				reportPanel.innerHTML = messages + reportString;
 			};
@@ -739,6 +750,8 @@
 			}
 			// ask the indicator to update after the image loads
 			context.loaded(context);
+			// disable the start function so it can't be started twice
+			this.start = function () {};
 		};
 		this.loaded = function (context) {
 			// if the image has loaded
@@ -910,7 +923,6 @@
 					}
 				}
 			});
-			gestures.start();
 		};
 		this.indicator.update = function (context) {
 			var left, top, right, bottom;
@@ -1129,6 +1141,8 @@
 			// cancel the click
 			return false;
 		};
+		// go
+		this.start();
 	};
 
 }(window.useful = window.useful || {}));
