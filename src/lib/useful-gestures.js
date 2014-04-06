@@ -64,6 +64,7 @@
 			config.twist = config.twist || function () {};
 		};
 		this.readEvent = function (event, dimension) {
+			var offsets = this.correctOffset(event.target || event.srcElement);
 			switch (dimension) {
 				case 'y' : return event.y || (event.touches && event.touches[0].pageY) || event.pageY || event.layerY + offsets.y;
 				default : return event.x || (event.touches && event.touches[0].pageX) || event.pageX || event.layerX + offsets.x;
