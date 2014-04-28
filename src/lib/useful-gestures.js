@@ -63,12 +63,24 @@
 			config.pinch = config.pinch || function () {};
 			config.twist = config.twist || function () {};
 		};
-		this.readEvent = function (event, dimension) {
-			var offsets = this.correctOffset(event.target || event.srcElement);
-			switch (dimension) {
-				case 'y' : return event.y || (event.touches && event.touches[0].pageY) || event.pageY || event.layerY + offsets.y;
-				default : return event.x || (event.touches && event.touches[0].pageX) || event.pageX || event.layerX + offsets.x;
+		this.readEvent = function (event) {
+			var coords = {}, offsets;
+			// try all likely methods of storing coordinates in an event
+			if (event.x !== undefined) {
+				coords.x = event.x;
+				coords.y = event.y;
+			} else if (event.touches && event.touches[0]) {
+				coords.x = event.touches[0].pageX;
+				coords.y = event.touches[0].pageY;
+			} else if (event.pageX !== undefined) {
+				coords.x = event.pageX;
+				coords.y = event.pageY;
+			} else {
+				offsets = this.correctOffset(event.target || event.srcElement);
+				coords.x = event.layerX + offsets.x;
+				coords.y = event.layerY + offsets.y;
 			}
+			return coords;
 		};
 		this.correctOffset = function (element) {
 			var offsetX = 0, offsetY = 0;
@@ -91,12 +103,12 @@
 			}
 		};
 		this.startTouch = function (event) {
-			// get the offset if the target shifts
-			var offsets = this.correctOffset(event.target || event.srcElement);
+			// get the coordinates from the event
+			var coords = this.readEvent(event);
 			// note the start position
 			this.touchOrigin = {
-				'x' : this.readEvent(event, 'x'),
-				'y' : this.readEvent(event, 'y'),
+				'x' : coords.x,
+				'y' : coords.y,
 				'target' : event.target || event.srcElement
 			};
 			this.touchProgression = {
@@ -107,23 +119,21 @@
 		this.changeTouch = function (event) {
 			// if there is an origin
 			if (this.touchOrigin) {
-				// get the offset if the target shifts
-				var offsets = this.correctOffset(event.target || event.srcElement),
-					x = this.readEvent(event, 'x'),
-					y = this.readEvent(event, 'y');
+				// get the coordinates from the event
+				var coords = this.readEvent(event);
 				// get the gesture parameters
 				this.cfg.drag({
 					'x' : this.touchOrigin.x,
 					'y' : this.touchOrigin.y,
-					'horizontal' : x - this.touchProgression.x,
-					'vertical' : y - this.touchProgression.y,
+					'horizontal' : coords.x - this.touchProgression.x,
+					'vertical' : coords.y - this.touchProgression.y,
 					'event' : event,
 					'source' : this.touchOrigin.target
 				});
 				// update the current position
 				this.touchProgression = {
-					'x' : x,
-					'y' : y
+					'x' : coords.x,
+					'y' : coords.y
 				};
 			}
 		};
@@ -201,17 +211,19 @@
 				// get the distances from the event
 				var scale = event.scale,
 					rotation = event.rotation;
+				// get the coordinates from the event
+				var coords = this.readEvent(event);
 				// get the gesture parameters
 				this.cfg.pinch({
-					'x' : this.readEvent(event, 'x'),
-					'y' : this.readEvent(event, 'y'),
+					'x' : coords.x,
+					'y' : coords.y,
 					'scale' : scale - this.gestureProgression.scale,
 					'event' : event,
 					'target' : this.gestureOrigin.target
 				});
 				this.cfg.twist({
-					'x' : this.readEvent(event, 'x'),
-					'y' : this.readEvent(event, 'y'),
+					'x' : coords.x,
+					'y' : coords.y,
 					'rotation' : rotation - this.gestureProgression.rotation,
 					'event' : event,
 					'target' : this.gestureOrigin.target
