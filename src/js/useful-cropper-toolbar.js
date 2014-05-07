@@ -12,7 +12,7 @@
 	"use strict";
 
 	// private functions
-	useful.CropperToolbar = function (parent) {
+	useful.Cropper_Toolbar = function (parent) {
 		this.parent = parent;
 		this.ui = {};
 		this.build = function () {

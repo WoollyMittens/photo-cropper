@@ -12,7 +12,7 @@
 	"use strict";
 
 	// private functions
-	useful.CropperIndicatorHandles = function (parent) {
+	useful.Cropper_Indicator_Handles = function (parent) {
 		this.parent = parent;
 		// indicator handles
 		this.build = function () {

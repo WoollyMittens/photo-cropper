@@ -12,7 +12,7 @@
 	"use strict";
 
 	// private functions
-	useful.CropperBusy = function (parent) {
+	useful.Cropper_Busy = function (parent) {
 		this.parent = parent;
 		this.build = function () {
 			// add a busy message

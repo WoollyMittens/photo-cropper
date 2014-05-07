@@ -12,8 +12,12 @@
 	"use strict";
 
 	// private functions
-	useful.CropperIndicator = function (parent) {
+	useful.Cropper_Indicator = function (parent) {
+		// properties
 		this.parent = parent;
+		// components
+		this.handles = new useful.CropperIndicator_Handles(this.parent);
+		// methods
 		this.build = function () {
 			var cfg = this.parent.cfg;
 			// create the indicator
@@ -108,8 +112,6 @@
 			// update the display
 			this.parent.update(true);
 		};
-		// handles
-		this.handles = new useful.CropperIndicatorHandles(this.parent);
 	};
 
 }(window.useful = window.useful || {}));

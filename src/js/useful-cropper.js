@@ -13,9 +13,15 @@
 
 	// private functions
 	useful.Cropper = function (obj, cfg) {
+		// properties
 		this.obj = obj;
 		this.cfg = cfg;
 		this.names = ['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'];
+		// components
+		this.busy = new useful.Cropper_Busy(this);
+		this.indicator = new useful.Cropper_Indicator(this);
+		this.toolbar = new useful.Cropper_Toolbar(this);
+		// methods
 		this.start = function () {
 			// store the image
 			this.cfg.image = this.obj.getElementsByTagName('img')[0];
@@ -146,12 +152,6 @@
 				}, this.cfg.delay);
 			}
 		};
-		// busy
-		this.busy = new useful.CropperBusy(this);
-		// indicator
-		this.indicator = new useful.CropperIndicator(this);
-		// toolbar
-		this.toolbar = new useful.CropperToolbar(this);
 		// go
 		this.start();
 	};
