@@ -16,7 +16,7 @@
 		// properties
 		this.parent = parent;
 		// components
-		this.handles = new useful.CropperIndicator_Handles(this.parent);
+		this.handles = new useful.Cropper_Indicator_Handles(this.parent);
 		// methods
 		this.build = function () {
 			var cfg = this.parent.cfg;

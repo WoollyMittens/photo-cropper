@@ -16,10 +16,12 @@
 		// properties
 		this.obj = obj;
 		this.cfg = cfg;
+		this.lastTouch = null;
 		this.touchOrigin = null;
 		this.touchProgression = null;
 		this.gestureOrigin = null;
 		this.gestureProgression = null;
+		this.paused = false;
 		// methods
 		this.start = function () {
 			// check the configuration properties
@@ -62,6 +64,7 @@
 			config.drag = config.drag || function () {};
 			config.pinch = config.pinch || function () {};
 			config.twist = config.twist || function () {};
+			config.doubleTap = config.doubleTap || function () {};
 		};
 		this.readEvent = function (event) {
 			var coords = {}, offsets;
@@ -103,18 +106,21 @@
 			}
 		};
 		this.startTouch = function (event) {
-			// get the coordinates from the event
-			var coords = this.readEvent(event);
-			// note the start position
-			this.touchOrigin = {
-				'x' : coords.x,
-				'y' : coords.y,
-				'target' : event.target || event.srcElement
-			};
-			this.touchProgression = {
-				'x' : this.touchOrigin.x,
-				'y' : this.touchOrigin.y
-			};
+			// if the functionality wasn't paused
+			if (!this.paused) {
+				// get the coordinates from the event
+				var coords = this.readEvent(event);
+				// note the start position
+				this.touchOrigin = {
+					'x' : coords.x,
+					'y' : coords.y,
+					'target' : event.target || event.srcElement
+				};
+				this.touchProgression = {
+					'x' : this.touchOrigin.x,
+					'y' : this.touchOrigin.y
+				};
+			}
 		};
 		this.changeTouch = function (event) {
 			// if there is an origin
@@ -145,8 +151,17 @@
 					'x' : this.touchProgression.x - this.touchOrigin.x,
 					'y' : this.touchProgression.y - this.touchOrigin.y
 				};
+				// if there was very little movement, but this is the second touch in quick successionif (
+				if (
+					this.lastTouch &&
+					Math.abs(this.touchOrigin.x - this.lastTouch.x) < 10 &&
+					Math.abs(this.touchOrigin.y - this.lastTouch.y) < 10 &&
+					new Date().getTime() - this.lastTouch.time < 300
+				) {
+					// treat this as a double tap
+					this.cfg.doubleTap({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'event' : event, 'source' : this.touchOrigin.target});
 				// if the horizontal motion was the largest
-				if (Math.abs(distance.x) > Math.abs(distance.y)) {
+				} else if (Math.abs(distance.x) > Math.abs(distance.y)) {
 					// if there was a right swipe
 					if (distance.x > this.cfg.threshold) {
 						// report the associated swipe
@@ -168,6 +183,12 @@
 						this.cfg.swipeUp({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'distance' : -distance.y, 'event' : event, 'source' : this.touchOrigin.target});
 					}
 				}
+				// store the history of this touch
+				this.lastTouch = {
+					'x' : this.touchOrigin.x,
+					'y' : this.touchOrigin.y,
+					'time' : new Date().getTime()
+				};
 			}
 			// clear the input
 			this.touchProgression = null;
@@ -176,12 +197,14 @@
 		this.changeWheel = function (event) {
 			// measure the wheel distance
 			var scale = 1, distance = ((window.event) ? window.event.wheelDelta / 120 : -event.detail / 3);
+			// get the coordinates from the event
+			var coords = this.readEvent(event);
 			// equate wheeling up / down to zooming in / out
 			scale = (distance > 0) ? +this.cfg.increment : scale = -this.cfg.increment;
 			// report the zoom
 			this.cfg.pinch({
-				'x' : 0,
-				'y' : 0,
+				'x' : coords.x,
+				'y' : coords.y,
 				'scale' : scale,
 				'event' : event,
 				'source' : event.target || event.srcElement
@@ -194,16 +217,19 @@
 			}
 		};
 		this.startGesture = function (event) {
-			// note the start position
-			this.gestureOrigin = {
-				'scale' : event.scale,
-				'rotation' : event.rotation,
-				'target' : event.target || event.srcElement
-			};
-			this.gestureProgression = {
-				'scale' : this.gestureOrigin.scale,
-				'rotation' : this.gestureOrigin.rotation
-			};
+			// if the functionality wasn't paused
+			if (!this.paused) {
+				// note the start position
+				this.gestureOrigin = {
+					'scale' : event.scale,
+					'rotation' : event.rotation,
+					'target' : event.target || event.srcElement
+				};
+				this.gestureProgression = {
+					'scale' : this.gestureOrigin.scale,
+					'rotation' : this.gestureOrigin.rotation
+				};
+			}
 		};
 		this.changeGesture = function (event) {
 			// if there is an origin
@@ -357,8 +383,7 @@
 
 	Usage:
 	var instances = new useful.Instances(document.querySelectorAll('#id.classname'), Constructor, {'foo':'bar'});
-	instances.wait(); or instances.start();
-	object = instances.get(element);
+	object = instances.getByObject(element);
 */
 
 (function (useful) {
@@ -367,25 +392,17 @@
 	"use strict";
 
 	// public functions
-	useful.Instances = function (objs, constructor, cfgs) {
+	useful.Instances = function (objs, constructor, cfg) {
 		// properties
 		this.objs = objs;
 		this.constructor = constructor;
-		this.cfgs = cfgs;
+		this.cfg = cfg;
 		this.constructs = [];
-		this.delay = 200;
-		// keeps trying until the DOM is ready
-		this.wait = function () {
-			var scope = this;
-			scope.timeout = (document.readyState.match(/interactive|loaded|complete/i)) ?
-				scope.start():
-				setTimeout(function () { scope.wait(); }, scope.delay);
-		};
 		// starts and stores an instance of the constructor for every element
 		this.start = function () {
 			for (var a = 0, b = this.objs.length; a < b; a += 1) {
-				// store a constructed instance with cloned cfgs object
-				this.constructs[a] = new this.constructor(this.objs[a], Object.create(this.cfgs));
+				// store a constructed instance with cloned cfg object
+				this.constructs[a] = new this.constructor(this.objs[a], Object.create(this.cfg));
 			}
 			// disable the start function so it can't be started twice
 			this.start = function () {};
@@ -404,8 +421,7 @@
 		this.getByIndex = function (index) {
 			return this.constructs[index];
 		};
-		// go
-		this.wait();
+		this.start();
 	};
 
 }(window.useful = window.useful || {}));
@@ -733,7 +749,7 @@
 	"use strict";
 
 	// private functions
-	useful.CropperBusy = function (parent) {
+	useful.Cropper_Busy = function (parent) {
 		this.parent = parent;
 		this.build = function () {
 			// add a busy message
@@ -769,7 +785,7 @@
 	"use strict";
 
 	// private functions
-	useful.CropperIndicatorHandles = function (parent) {
+	useful.Cropper_Indicator_Handles = function (parent) {
 		this.parent = parent;
 		// indicator handles
 		this.build = function () {
@@ -872,8 +888,12 @@
 	"use strict";
 
 	// private functions
-	useful.CropperIndicator = function (parent) {
+	useful.Cropper_Indicator = function (parent) {
+		// properties
 		this.parent = parent;
+		// components
+		this.handles = new useful.Cropper_Indicator_Handles(this.parent);
+		// methods
 		this.build = function () {
 			var cfg = this.parent.cfg;
 			// create the indicator
@@ -968,8 +988,6 @@
 			// update the display
 			this.parent.update(true);
 		};
-		// handles
-		this.handles = new useful.CropperIndicatorHandles(this.parent);
 	};
 
 }(window.useful = window.useful || {}));
@@ -988,7 +1006,7 @@
 	"use strict";
 
 	// private functions
-	useful.CropperToolbar = function (parent) {
+	useful.Cropper_Toolbar = function (parent) {
 		this.parent = parent;
 		this.ui = {};
 		this.build = function () {
@@ -1113,9 +1131,15 @@
 
 	// private functions
 	useful.Cropper = function (obj, cfg) {
+		// properties
 		this.obj = obj;
 		this.cfg = cfg;
 		this.names = ['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'];
+		// components
+		this.busy = new useful.Cropper_Busy(this);
+		this.indicator = new useful.Cropper_Indicator(this);
+		this.toolbar = new useful.Cropper_Toolbar(this);
+		// methods
 		this.start = function () {
 			// store the image
 			this.cfg.image = this.obj.getElementsByTagName('img')[0];
@@ -1246,12 +1270,6 @@
 				}, this.cfg.delay);
 			}
 		};
-		// busy
-		this.busy = new useful.CropperBusy(this);
-		// indicator
-		this.indicator = new useful.CropperIndicator(this);
-		// toolbar
-		this.toolbar = new useful.CropperToolbar(this);
 		// go
 		this.start();
 	};

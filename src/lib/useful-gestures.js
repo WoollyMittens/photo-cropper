@@ -16,10 +16,12 @@
 		// properties
 		this.obj = obj;
 		this.cfg = cfg;
+		this.lastTouch = null;
 		this.touchOrigin = null;
 		this.touchProgression = null;
 		this.gestureOrigin = null;
 		this.gestureProgression = null;
+		this.paused = false;
 		// methods
 		this.start = function () {
 			// check the configuration properties
@@ -62,6 +64,7 @@
 			config.drag = config.drag || function () {};
 			config.pinch = config.pinch || function () {};
 			config.twist = config.twist || function () {};
+			config.doubleTap = config.doubleTap || function () {};
 		};
 		this.readEvent = function (event) {
 			var coords = {}, offsets;
@@ -103,18 +106,21 @@
 			}
 		};
 		this.startTouch = function (event) {
-			// get the coordinates from the event
-			var coords = this.readEvent(event);
-			// note the start position
-			this.touchOrigin = {
-				'x' : coords.x,
-				'y' : coords.y,
-				'target' : event.target || event.srcElement
-			};
-			this.touchProgression = {
-				'x' : this.touchOrigin.x,
-				'y' : this.touchOrigin.y
-			};
+			// if the functionality wasn't paused
+			if (!this.paused) {
+				// get the coordinates from the event
+				var coords = this.readEvent(event);
+				// note the start position
+				this.touchOrigin = {
+					'x' : coords.x,
+					'y' : coords.y,
+					'target' : event.target || event.srcElement
+				};
+				this.touchProgression = {
+					'x' : this.touchOrigin.x,
+					'y' : this.touchOrigin.y
+				};
+			}
 		};
 		this.changeTouch = function (event) {
 			// if there is an origin
@@ -145,8 +151,17 @@
 					'x' : this.touchProgression.x - this.touchOrigin.x,
 					'y' : this.touchProgression.y - this.touchOrigin.y
 				};
+				// if there was very little movement, but this is the second touch in quick successionif (
+				if (
+					this.lastTouch &&
+					Math.abs(this.touchOrigin.x - this.lastTouch.x) < 10 &&
+					Math.abs(this.touchOrigin.y - this.lastTouch.y) < 10 &&
+					new Date().getTime() - this.lastTouch.time < 300
+				) {
+					// treat this as a double tap
+					this.cfg.doubleTap({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'event' : event, 'source' : this.touchOrigin.target});
 				// if the horizontal motion was the largest
-				if (Math.abs(distance.x) > Math.abs(distance.y)) {
+				} else if (Math.abs(distance.x) > Math.abs(distance.y)) {
 					// if there was a right swipe
 					if (distance.x > this.cfg.threshold) {
 						// report the associated swipe
@@ -168,6 +183,12 @@
 						this.cfg.swipeUp({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'distance' : -distance.y, 'event' : event, 'source' : this.touchOrigin.target});
 					}
 				}
+				// store the history of this touch
+				this.lastTouch = {
+					'x' : this.touchOrigin.x,
+					'y' : this.touchOrigin.y,
+					'time' : new Date().getTime()
+				};
 			}
 			// clear the input
 			this.touchProgression = null;
@@ -176,12 +197,14 @@
 		this.changeWheel = function (event) {
 			// measure the wheel distance
 			var scale = 1, distance = ((window.event) ? window.event.wheelDelta / 120 : -event.detail / 3);
+			// get the coordinates from the event
+			var coords = this.readEvent(event);
 			// equate wheeling up / down to zooming in / out
 			scale = (distance > 0) ? +this.cfg.increment : scale = -this.cfg.increment;
 			// report the zoom
 			this.cfg.pinch({
-				'x' : 0,
-				'y' : 0,
+				'x' : coords.x,
+				'y' : coords.y,
 				'scale' : scale,
 				'event' : event,
 				'source' : event.target || event.srcElement
@@ -194,16 +217,19 @@
 			}
 		};
 		this.startGesture = function (event) {
-			// note the start position
-			this.gestureOrigin = {
-				'scale' : event.scale,
-				'rotation' : event.rotation,
-				'target' : event.target || event.srcElement
-			};
-			this.gestureProgression = {
-				'scale' : this.gestureOrigin.scale,
-				'rotation' : this.gestureOrigin.rotation
-			};
+			// if the functionality wasn't paused
+			if (!this.paused) {
+				// note the start position
+				this.gestureOrigin = {
+					'scale' : event.scale,
+					'rotation' : event.rotation,
+					'target' : event.target || event.srcElement
+				};
+				this.gestureProgression = {
+					'scale' : this.gestureOrigin.scale,
+					'rotation' : this.gestureOrigin.rotation
+				};
+			}
 		};
 		this.changeGesture = function (event) {
 			// if there is an origin
