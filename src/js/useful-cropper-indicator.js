@@ -36,37 +36,47 @@
 				'cancelTouch' : true,
 				'cancelGesture' : true,
 				'drag' : function (metrics) {
+					// move the handles
 					switch (metrics.source.className) {
-					case 'cr-tl' :
-						context.handles.left(metrics.horizontal);
-						context.handles.top(metrics.vertical);
-						break;
-					case 'cr-tc' :
-						context.handles.top(metrics.vertical);
-						break;
-					case 'cr-tr' :
-						context.handles.right(metrics.horizontal);
-						context.handles.top(metrics.vertical);
-						break;
-					case 'cr-ml' :
-						context.handles.left(metrics.horizontal);
-						break;
-					case 'cr-mr' :
-						context.handles.right(metrics.horizontal);
-						break;
-					case 'cr-bl' :
-						context.handles.left(metrics.horizontal);
-						context.handles.bottom(metrics.vertical);
-						break;
-					case 'cr-bc' :
-						context.handles.bottom(metrics.vertical);
-						break;
-					case 'cr-br' :
-						context.handles.right(metrics.horizontal);
-						context.handles.bottom(metrics.vertical);
-						break;
-					default :
-						context.move(metrics.horizontal, metrics.vertical);
+						case 'cr-tl' :
+							context.handles.left(metrics.horizontal);
+							context.handles.top(metrics.vertical);
+							context.parent.update(null, true, 'tl');
+							break;
+						case 'cr-tc' :
+							context.handles.top(metrics.vertical);
+							context.parent.update(null, true, 'tc');
+							break;
+						case 'cr-tr' :
+							context.handles.right(metrics.horizontal);
+							context.handles.top(metrics.vertical);
+							context.parent.update(null, true, 'tr');
+							break;
+						case 'cr-ml' :
+							context.handles.left(metrics.horizontal);
+							context.parent.update(null, true, 'ml');
+							break;
+						case 'cr-mr' :
+							context.handles.right(metrics.horizontal);
+							context.parent.update(null, true, 'mr');
+							break;
+						case 'cr-bl' :
+							context.handles.left(metrics.horizontal);
+							context.handles.bottom(metrics.vertical);
+							context.parent.update(null, true, 'bl');
+							break;
+						case 'cr-bc' :
+							context.handles.bottom(metrics.vertical);
+							context.parent.update(null, true, 'bc');
+							break;
+						case 'cr-br' :
+							context.handles.right(metrics.horizontal);
+							context.handles.bottom(metrics.vertical);
+							context.parent.update(null, true, 'br');
+							break;
+						default :
+							context.move(metrics.horizontal, metrics.vertical);
+							context.parent.update(null, true, null);
 					}
 				}
 			});
@@ -109,8 +119,6 @@
 				cfg.right = right;
 				cfg.bottom = bottom;
 			}
-			// update the display
-			this.parent.update(true);
 		};
 	};
 

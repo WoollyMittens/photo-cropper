@@ -37,6 +37,7 @@ var cropper = new useful.Cropper( document.getElementById('id'), {
 	'right' : 0.9,
 	'bottom' : 0.9,
 	'minimum' : 0.2,
+	'aspect' : 0.75,
 	'onchange' : function(){},
 	'delay' : 1000,
 	'realtime' : false,

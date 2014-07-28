@@ -43,8 +43,6 @@
 				// apply the movement to the crop fractions
 				cfg.left = left;
 			}
-			// update the display
-			this.parent.update(true);
 		};
 		this.top = function (distance) {
 			var cfg = this.parent.cfg;
@@ -60,8 +58,6 @@
 				// apply the movement to the crop fractions
 				cfg.top = top;
 			}
-			// update the display
-			this.parent.update(true);
 		};
 		this.right = function (distance) {
 			var cfg = this.parent.cfg;
@@ -77,8 +73,6 @@
 				// apply the movement to the crop fractions
 				cfg.right = right;
 			}
-			// update the display
-			this.parent.update(true);
 		};
 		this.bottom = function (distance) {
 			var cfg = this.parent.cfg;
@@ -94,8 +88,6 @@
 				// apply the movement to the crop fractions
 				cfg.bottom = bottom;
 			}
-			// update the display
-			this.parent.update(true);
 		};
 	};
 

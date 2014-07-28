@@ -816,8 +816,6 @@
 				// apply the movement to the crop fractions
 				cfg.left = left;
 			}
-			// update the display
-			this.parent.update(true);
 		};
 		this.top = function (distance) {
 			var cfg = this.parent.cfg;
@@ -833,8 +831,6 @@
 				// apply the movement to the crop fractions
 				cfg.top = top;
 			}
-			// update the display
-			this.parent.update(true);
 		};
 		this.right = function (distance) {
 			var cfg = this.parent.cfg;
@@ -850,8 +846,6 @@
 				// apply the movement to the crop fractions
 				cfg.right = right;
 			}
-			// update the display
-			this.parent.update(true);
 		};
 		this.bottom = function (distance) {
 			var cfg = this.parent.cfg;
@@ -867,8 +861,6 @@
 				// apply the movement to the crop fractions
 				cfg.bottom = bottom;
 			}
-			// update the display
-			this.parent.update(true);
 		};
 	};
 
@@ -912,37 +904,47 @@
 				'cancelTouch' : true,
 				'cancelGesture' : true,
 				'drag' : function (metrics) {
+					// move the handles
 					switch (metrics.source.className) {
-					case 'cr-tl' :
-						context.handles.left(metrics.horizontal);
-						context.handles.top(metrics.vertical);
-						break;
-					case 'cr-tc' :
-						context.handles.top(metrics.vertical);
-						break;
-					case 'cr-tr' :
-						context.handles.right(metrics.horizontal);
-						context.handles.top(metrics.vertical);
-						break;
-					case 'cr-ml' :
-						context.handles.left(metrics.horizontal);
-						break;
-					case 'cr-mr' :
-						context.handles.right(metrics.horizontal);
-						break;
-					case 'cr-bl' :
-						context.handles.left(metrics.horizontal);
-						context.handles.bottom(metrics.vertical);
-						break;
-					case 'cr-bc' :
-						context.handles.bottom(metrics.vertical);
-						break;
-					case 'cr-br' :
-						context.handles.right(metrics.horizontal);
-						context.handles.bottom(metrics.vertical);
-						break;
-					default :
-						context.move(metrics.horizontal, metrics.vertical);
+						case 'cr-tl' :
+							context.handles.left(metrics.horizontal);
+							context.handles.top(metrics.vertical);
+							context.parent.update(null, true, 'tl');
+							break;
+						case 'cr-tc' :
+							context.handles.top(metrics.vertical);
+							context.parent.update(null, true, 'tc');
+							break;
+						case 'cr-tr' :
+							context.handles.right(metrics.horizontal);
+							context.handles.top(metrics.vertical);
+							context.parent.update(null, true, 'tr');
+							break;
+						case 'cr-ml' :
+							context.handles.left(metrics.horizontal);
+							context.parent.update(null, true, 'ml');
+							break;
+						case 'cr-mr' :
+							context.handles.right(metrics.horizontal);
+							context.parent.update(null, true, 'mr');
+							break;
+						case 'cr-bl' :
+							context.handles.left(metrics.horizontal);
+							context.handles.bottom(metrics.vertical);
+							context.parent.update(null, true, 'bl');
+							break;
+						case 'cr-bc' :
+							context.handles.bottom(metrics.vertical);
+							context.parent.update(null, true, 'bc');
+							break;
+						case 'cr-br' :
+							context.handles.right(metrics.horizontal);
+							context.handles.bottom(metrics.vertical);
+							context.parent.update(null, true, 'br');
+							break;
+						default :
+							context.move(metrics.horizontal, metrics.vertical);
+							context.parent.update(null, true, null);
 					}
 				}
 			});
@@ -985,8 +987,6 @@
 				cfg.right = right;
 				cfg.bottom = bottom;
 			}
-			// update the display
-			this.parent.update(true);
 		};
 	};
 
@@ -1145,7 +1145,7 @@
 			this.cfg.image = this.obj.getElementsByTagName('img')[0];
 			// store the hidden fields
 			this.cfg.output = this.obj.getElementsByTagName('input');
-			this.cfg.values = {};
+			this.cfg.values = null;
 			// validate presets
 			this.cfg.onchange = this.cfg.onchange || function () {};
 			this.cfg.delay = this.cfg.delay || 1000;
@@ -1240,13 +1240,54 @@
 				}
 			}
 		};
-		this.update = function (values, changed) {
+		this.correct = function (handle) {
+			// determine the dominant motion
+			var dLeft = Math.abs(this.cfg.values.left - this.cfg.left),
+				dTop = Math.abs(this.cfg.values.top - this.cfg.top),
+				dRight = Math.abs(this.cfg.values.right - this.cfg.right),
+				dBottom = Math.abs(this.cfg.values.bottom - this.cfg.bottom),
+				aspect = this.cfg.aspect;
+			// implement the aspect ratio from the required corner
+			switch (handle) {
+				case 'tl' : 
+					if (dLeft > dTop) { this.cfg.top = this.cfg.bottom - (this.cfg.right - this.cfg.left) * aspect; }
+					else { this.cfg.left = this.cfg.right - (this.cfg.bottom - this.cfg.top) / aspect; }
+					break;
+				case 'tc' : 
+					this.cfg.right = this.cfg.left + (this.cfg.bottom - this.cfg.top) / aspect;
+					break;
+				case 'tr' : 
+					if (dRight > dTop) { this.cfg.top = this.cfg.bottom - (this.cfg.right - this.cfg.left) * aspect; }
+					else { this.cfg.right = this.cfg.left + (this.cfg.bottom - this.cfg.top) / aspect;  }
+					break;
+				case 'ml' : 
+					this.cfg.bottom = this.cfg.top + (this.cfg.right - this.cfg.left) * aspect;
+					break;
+				case 'mr' :
+					this.cfg.bottom = this.cfg.top + (this.cfg.right - this.cfg.left) * aspect;
+					break;
+				case 'bl' : 
+					if (dLeft > dBottom) { this.cfg.bottom = this.cfg.top + (this.cfg.right - this.cfg.left) * aspect; }
+					else { this.cfg.left = this.cfg.right - (this.cfg.bottom - this.cfg.top) / aspect; }
+					break;
+				case 'bc' : 
+					this.cfg.right = this.cfg.left + (this.cfg.bottom - this.cfg.top) / aspect;
+					break;
+				case 'br' : 
+					if (dRight > dBottom) { this.cfg.bottom = this.cfg.top + (this.cfg.right - this.cfg.left) * aspect; }
+					else { this.cfg.right = this.cfg.left + (this.cfg.bottom - this.cfg.top) / aspect; }
+					break;
+			}
+		};
+		this.update = function (values, changed, handle) {
 			changed = (changed === true);
 			// process any override values
 			if (values && values.left) { this.cfg.left = values.left; }
 			if (values && values.top) { this.cfg.top = values.top; }
 			if (values && values.right) { this.cfg.right = values.right; }
 			if (values && values.bottom) { this.cfg.bottom = values.bottom; }
+			// correct the values for aspect ratio
+			if (this.cfg.aspect && this.cfg.values && handle) { this.correct(handle); }
 			// refresh the hidden fields
 			this.cfg.output[0].value = this.cfg.left;
 			this.cfg.output[1].value = this.cfg.top;
