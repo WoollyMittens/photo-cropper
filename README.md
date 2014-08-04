@@ -60,6 +60,8 @@ var cropper = new useful.Cropper( document.getElementById('id'), {
 
 **minimum : {float}** - The smallest fraction of the image that is able to be cropped. This value should be large enough to avoid overlapping guides.
 
+**aspect : {float}** - A fixed aspect ratio for the box to conform to.
+
 **onchange : {function}** - An external function to call after every change to the cropping area.
 
 **delay : {integer}** - The time in miliseconds to wait before triggering the onchange function. This limits the rate at which the function is called.
