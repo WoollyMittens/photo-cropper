@@ -106,7 +106,7 @@ figure.cropper {
 		}
 		button.cr-reset {}
 		button[disabled] {
-			background-color : $color-disabled;
+			opacity : 0.5;
 		}
 	}
 	&.cr-disabled {

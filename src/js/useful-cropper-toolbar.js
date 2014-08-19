@@ -17,6 +17,7 @@
 		this.ui = {};
 		this.build = function () {
 			var cfg = this.parent.cfg;
+			var context = this;
 			// create the toolbar
 			cfg.toolbar = document.createElement('figcaption');
 			// create the apply button
@@ -34,7 +35,6 @@
 			cfg.resetButton.className = 'cr-reset button';
 			cfg.resetButton.innerHTML = 'Reset';
 			cfg.toolbar.appendChild(cfg.resetButton);
-			var context = this;
 			cfg.resetButton.onclick = function () {
 				context.reset();
 			};
@@ -44,6 +44,7 @@
 		this.apply = function () {
 			var cfg = this.parent.cfg;
 			var src, width, height, aspect;
+			var context = this;
 			// normalise the dimensions
 			width = cfg.overlay.offsetWidth;
 			height = cfg.overlay.offsetHeight;
@@ -61,7 +62,6 @@
 			// show busy message
 			this.parent.busy.show();
 			// upon loading
-			var context = this;
 			cfg.image.onload = function () {
 				// set the image to center
 				cfg.image.style.marginTop = Math.round((context.parent.obj.offsetHeight - cfg.image.offsetHeight - cfg.offset) / 2) + 'px';
@@ -79,6 +79,7 @@
 			src = useful.urls.replace(src, 'top', cfg.top);
 			src = useful.urls.replace(src, 'right', cfg.right);
 			src = useful.urls.replace(src, 'bottom', cfg.bottom);
+			src = useful.urls.replace(src, 'time', new Date().getTime());
 			cfg.image.src = src;
 			// disable the indicator
 			cfg.applyButton.disabled = true;
@@ -90,10 +91,10 @@
 		};
 		this.reset = function () {
 			var cfg = this.parent.cfg;
+			var context = this;
 			// show busy message
 			this.parent.busy.show();
 			// upon loading
-			var context = this;
 			cfg.image.onload = function () {
 				// undo the margin
 				cfg.image.style.marginTop = 0;
@@ -111,7 +112,8 @@
 				context.parent.busy.hide();
 			};
 			// replace the image with an uncropped version
-			cfg.image.src = cfg.url;
+			cfg.url = useful.urls.replace(cfg.url, 'name', new Date().getTime());
+			cfg.image.src =  cfg.url;
 			cfg.overlay.style.backgroundImage = 'url(' + cfg.url + ')';
 			// trigger any external onchange event
 			cfg.onchange(cfg.values);

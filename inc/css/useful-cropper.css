@@ -40,6 +40,9 @@ figure.cropper {
 }
 /* line 15, ../../src/scss/useful-cropper.scss */
 figure.cropper span.cr-busy {
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
   -o-border-radius: 5px;
   border-radius: 5px;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=70);
@@ -150,7 +153,7 @@ figure.cropper figcaption button.cr-apply {
 }
 /* line 108, ../../src/scss/useful-cropper.scss */
 figure.cropper figcaption button[disabled] {
-  background-color: #7f7f7f;
+  opacity: 0.5;
 }
 /* line 113, ../../src/scss/useful-cropper.scss */
 figure.cropper.cr-disabled span.cr-overlay {
