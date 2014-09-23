@@ -40,9 +40,6 @@ figure.cropper {
 }
 /* line 15, ../../src/scss/useful-cropper.scss */
 figure.cropper span.cr-busy {
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  -ms-border-radius: 5px;
   -o-border-radius: 5px;
   border-radius: 5px;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=70);

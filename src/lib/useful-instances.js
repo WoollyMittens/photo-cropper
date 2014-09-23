@@ -4,13 +4,12 @@
 
 	License:
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
-	Usage:
-	var instances = new useful.Instances(document.querySelectorAll('#id.classname'), Constructor, {'foo':'bar'});
-	object = instances.getByObject(element);
 */
 
-(function (useful) {
+// public object
+var useful = useful || {};
+
+(function(){
 
 	// Invoke strict mode
 	"use strict";
@@ -48,4 +47,9 @@
 		this.start();
 	};
 
-}(window.useful = window.useful || {}));
+	// return as a require.js module
+	if (typeof module !== 'undefined') {
+		exports = module.exports = useful.Instances;
+	}
+
+})();

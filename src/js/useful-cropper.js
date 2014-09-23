@@ -6,7 +6,10 @@
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
 */
 
-(function (useful) {
+// public object
+var useful = useful || {};
+
+(function(){
 
 	// invoke strict mode
 	"use strict";
@@ -131,31 +134,31 @@
 				aspect = this.cfg.aspect;
 			// implement the aspect ratio from the required corner
 			switch (handle) {
-				case 'tl' : 
+				case 'tl' :
 					if (dLeft > dTop) { this.cfg.top = this.cfg.bottom - (this.cfg.right - this.cfg.left) * aspect; }
 					else { this.cfg.left = this.cfg.right - (this.cfg.bottom - this.cfg.top) / aspect; }
 					break;
-				case 'tc' : 
+				case 'tc' :
 					this.cfg.right = this.cfg.left + (this.cfg.bottom - this.cfg.top) / aspect;
 					break;
-				case 'tr' : 
+				case 'tr' :
 					if (dRight > dTop) { this.cfg.top = this.cfg.bottom - (this.cfg.right - this.cfg.left) * aspect; }
 					else { this.cfg.right = this.cfg.left + (this.cfg.bottom - this.cfg.top) / aspect;  }
 					break;
-				case 'ml' : 
+				case 'ml' :
 					this.cfg.bottom = this.cfg.top + (this.cfg.right - this.cfg.left) * aspect;
 					break;
 				case 'mr' :
 					this.cfg.bottom = this.cfg.top + (this.cfg.right - this.cfg.left) * aspect;
 					break;
-				case 'bl' : 
+				case 'bl' :
 					if (dLeft > dBottom) { this.cfg.bottom = this.cfg.top + (this.cfg.right - this.cfg.left) * aspect; }
 					else { this.cfg.left = this.cfg.right - (this.cfg.bottom - this.cfg.top) / aspect; }
 					break;
-				case 'bc' : 
+				case 'bc' :
 					this.cfg.right = this.cfg.left + (this.cfg.bottom - this.cfg.top) / aspect;
 					break;
-				case 'br' : 
+				case 'br' :
 					if (dRight > dBottom) { this.cfg.bottom = this.cfg.top + (this.cfg.right - this.cfg.left) * aspect; }
 					else { this.cfg.right = this.cfg.left + (this.cfg.bottom - this.cfg.top) / aspect; }
 					break;
@@ -197,4 +200,9 @@
 		this.start();
 	};
 
-}(window.useful = window.useful || {}));
+	// return as a require.js module
+	if (typeof module !== 'undefined') {
+		exports = module.exports = useful.Cropper;
+	}
+
+})();
