@@ -40,6 +40,7 @@ var useful = useful || {};
 			this.cfg.crop = this.cfg.crop || [0.1, 0.1, 0.9, 0.9];
 			this.cfg.url = this.cfg.image.src;
 			this.cfg.offset = this.cfg.offset || 4;
+			this.cfg.reset = [this.cfg.left, this.cfg.top, this.cfg.right, this.cfg.bottom];
 			// build the busy message
 			this.busy.build();
 			// build the indicator

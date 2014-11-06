@@ -102,10 +102,10 @@ var useful = useful || {};
 				// undo the margin
 				cfg.image.style.marginTop = 0;
 				// undo the values
-				cfg.left = 0;
-				cfg.top = 0;
-				cfg.right = 1;
-				cfg.bottom = 1;
+				cfg.left = cfg.reset[0];
+				cfg.top = cfg.reset[1];
+				cfg.right = cfg.reset[2];
+				cfg.bottom = cfg.reset[3];
 				// reset the indicator
 				context.parent.update();
 				// enable the indicator

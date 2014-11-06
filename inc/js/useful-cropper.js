@@ -1337,10 +1337,10 @@ var useful = useful || {};
 				// undo the margin
 				cfg.image.style.marginTop = 0;
 				// undo the values
-				cfg.left = 0;
-				cfg.top = 0;
-				cfg.right = 1;
-				cfg.bottom = 1;
+				cfg.left = cfg.reset[0];
+				cfg.top = cfg.reset[1];
+				cfg.right = cfg.reset[2];
+				cfg.bottom = cfg.reset[3];
 				// reset the indicator
 				context.parent.update();
 				// enable the indicator
@@ -1409,6 +1409,7 @@ var useful = useful || {};
 			this.cfg.crop = this.cfg.crop || [0.1, 0.1, 0.9, 0.9];
 			this.cfg.url = this.cfg.image.src;
 			this.cfg.offset = this.cfg.offset || 4;
+			this.cfg.reset = [this.cfg.left, this.cfg.top, this.cfg.right, this.cfg.bottom];
 			// build the busy message
 			this.busy.build();
 			// build the indicator

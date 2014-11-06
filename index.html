@@ -38,39 +38,66 @@
 
 				<!-- Cut below this -->
 				<style>@import url("./inc/css/useful-cropper.css");</style>
-				<figure class="cropper">
+				<figure class="cropper" id="exampleCropperA">
 					<img alt="" src="inc/php/imageslice.php?src=../../inc/img/figure_0a.jpg&amp;width=256&amp;height=256&amp;left=0&amp;top=0&amp;right=1&amp;bottom=1&amp;time=0"/>
 					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
 				</figure>
-				<figure class="cropper">
+				<figure class="cropper" id="exampleCropperB">
 					<img alt="" src="inc/php/imageslice.php?src=../../inc/img/figure_1a.jpg&amp;width=256&amp;height=128&amp;left=0&amp;top=0.25&amp;right=1&amp;bottom=0.75&amp;time=0"/>
 					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
 				</figure>
-				<figure class="cropper">
+				<figure class="cropper" id="exampleCropperC">
 					<img alt="" src="inc/php/imageslice.php?src=../../inc/img/figure_2a.jpg&amp;width=256&amp;height=256&amp;left=0&amp;top=0&amp;right=1&amp;bottom=1&amp;time=0"/>
 					<input name="left" type="hidden" value=""/><input name="top" type="hidden" value=""/><input name="right" type="hidden" value=""/><input name="bottom" type="hidden" value=""/>
 				</figure>
 				<script src="./inc/js/useful-cropper.js"></script>
 				<script>
 				//<!--
-					// create new instances of the script
-					var croppers = new useful.Instances(
-						document.querySelectorAll('figure.cropper'),
-						useful.Cropper,
-						{
-							'left' : 0.1,
-							'top' : 0.1,
-							'right' : 0.9,
-							'bottom' : 0.9,
-							'minimum' : 0.2,
-							'aspect' : null,
-							'onchange' : function(){},
-							'delay' : 1000,
-							'realtime' : false,
-							'offset' : 2,
-							'slice' : 'inc/php/imageslice.php?src=../../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}&time={time}'
-						}
-					);
+					// Example without aspect ratio
+					var cropperA = new useful.Cropper(document.getElementById('exampleCropperA'), {
+						'left' : 0.1,
+						'top' : 0.1,
+						'right' : 0.9,
+						'bottom' : 0.9,
+						'minimum' : 0.2,
+						'aspect' : null,
+						'onchange' : function(){},
+						'delay' : 1000,
+						'realtime' : false,
+						'offset' : 2,
+						'slice' : 'inc/php/imageslice.php?src=../../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}&time={time}'
+					});
+
+					// Example preset crop area
+					var cropperB = new useful.Cropper(document.getElementById('exampleCropperB'), {
+						'left' : 0,
+						'top' : 0.25,
+						'right' : 1,
+						'bottom' : 0.75,
+						'minimum' : 0.2,
+						'aspect' : null,
+						'onchange' : function(){},
+						'delay' : 1000,
+						'realtime' : false,
+						'offset' : 2,
+						'slice' : 'inc/php/imageslice.php?src=../../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}&time={time}'
+					});
+
+					// Example with aspect ratio
+					var cropperC = new useful.Cropper(document.getElementById('exampleCropperC'), {
+						'left' : 0.1,
+						'top' : 0.1,
+						'right' : 0.9,
+						'bottom' : 0.9,
+						'minimum' : 0.2,
+						'aspect' : 1,
+						'onchange' : function(){},
+						'delay' : 1000,
+						'realtime' : false,
+						'offset' : 2,
+						'slice' : 'inc/php/imageslice.php?src=../../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}&time={time}'
+					});
+
 				//-->
 				</script>
 				<!-- Cut above this -->
