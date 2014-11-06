@@ -40,6 +40,7 @@ var useful = useful || {};
 				'cancelGesture' : true,
 				'drag' : function (metrics) {
 					// move the handles
+					console.log(metrics);
 					switch (metrics.source.className) {
 						case 'cr-tl' :
 							context.handles.left(metrics.horizontal);
