@@ -28,10 +28,9 @@ To enable the use of HTML5 tags in Internet Explorer 8 and lower, include *html5
 
 ## How to start the script
 
-This is the safest way of starting the script, but allows for only one target element at a time.
-
 ```javascript
-var cropper = new useful.Cropper( document.getElementById('id'), {
+var cropper = new useful.Cropper().init({
+	'element' : document.getElementById('id'),
 	'left' : 0.1,
 	'top' : 0.1,
 	'right' : 0.9,
@@ -72,54 +71,6 @@ var cropper = new useful.Cropper( document.getElementById('id'), {
 
 **'slice' : {string}** - A webservice for resizing images. An example is provided as *./php/imageslice.php*.
 
-### Using document.querySelectorAll
-
-This method allows CSS Rules to be used to apply the script to one or more nodes at the same time.
-
-```javascript
-var croppers = new useful.Instances(
-	document.querySelectorAll('figure.cropper'),
-	useful.Cropper,
-	{
-		'left' : 0.1,
-		'top' : 0.1,
-		'right' : 0.9,
-		'bottom' : 0.9,
-		'minimum' : 0.2,
-		'onchange' : function(){},
-		'delay' : 1000,
-		'realtime' : false,
-		'offset' : 2,
-		'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
-	}
-);
-```
-
-The "Instances" function clones the settings for each element in the CSS rule.
-
-### Using jQuery
-
-This method is similar to the previous one, but uses jQuery for processing the CSS rule and cloning the settings.
-
-```javascript
-var croppers = [];
-$('figure.cropper').each(function (index, element) {
-	croppers[index] = new useful.Cropper( element, {
-		'left' : 0.1,
-		'top' : 0.1,
-		'right' : 0.9,
-		'bottom' : 0.9,
-		'minimum' : 0.2,
-		'onchange' : function(){},
-		'delay' : 1000,
-		'realtime' : false,
-		'offset' : 2,
-		'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
-	});
-	croppers[index].start();
-});
-```
-
 ## How to control the script
 
 ### Update
@@ -133,7 +84,7 @@ Preset a crop setting.
 ### Apply
 
 ```javascript
-cropper.toolbar.apply(cropper);
+cropper.toolbar.apply();
 ```
 
 Apply the cropping settings.
@@ -141,7 +92,7 @@ Apply the cropping settings.
 ### Reset
 
 ```javascript
-cropper.toolbar.reset(cropper);
+cropper.toolbar.reset();
 ```
 
 Reset the cropper.

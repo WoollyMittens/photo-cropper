@@ -29,11 +29,11 @@
 
 				<p>
 					<!-- externally set crop coordinates -->
-					<a href="#" onclick="var cropper = croppers.getByIndex(0); cropper.update({left:0.1, top:0.2, right:0.7, bottom:0.6});">Preset a crop</a> |
+					<a href="#" onclick="cropperA.update({left:0.1, top:0.2, right:0.7, bottom:0.6});">Preset a crop</a> |
 					<!-- externally apply the settings -->
-					<a href="#" onclick="var cropper = croppers.getByIndex(0); cropper.toolbar.apply(cropper);">Apply the settings</a> |
+					<a href="#" onclick="cropperA.toolbar.apply();">Apply the settings</a> |
 					<!-- externally reset the interface -->
-					<a href="#" onclick="var cropper = croppers.getByIndex(0); cropper.toolbar.reset(cropper);">Reset the interface</a>
+					<a href="#" onclick="cropperA.toolbar.reset();">Reset the interface</a>
 				</p>
 
 				<!-- Cut below this -->
@@ -54,7 +54,8 @@
 				<script>
 				//<!--
 					// Example without aspect ratio
-					var cropperA = new useful.Cropper(document.getElementById('exampleCropperA'), {
+					var cropperA = new useful.Cropper().init({
+						'element' : document.getElementById('exampleCropperA'),
 						'left' : 0.1,
 						'top' : 0.1,
 						'right' : 0.9,
@@ -69,7 +70,8 @@
 					});
 
 					// Example preset crop area
-					var cropperB = new useful.Cropper(document.getElementById('exampleCropperB'), {
+					var cropperB = new useful.Cropper().init({
+						'element' : document.getElementById('exampleCropperB'),
 						'left' : 0,
 						'top' : 0.25,
 						'right' : 1,
@@ -84,7 +86,8 @@
 					});
 
 					// Example with aspect ratio
-					var cropperC = new useful.Cropper(document.getElementById('exampleCropperC'), {
+					var cropperC = new useful.Cropper().init({
+						'element' : document.getElementById('exampleCropperC'),
 						'left' : 0.1,
 						'top' : 0.1,
 						'right' : 0.9,

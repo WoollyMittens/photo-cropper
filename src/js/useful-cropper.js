@@ -1,209 +1,191 @@
 /*
 	Source:
-	van Creij, Maurice (2012). "useful.cropper.js: A simple image cropper", version 20130510, http://www.woollymittens.nl/.
+	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
 
 	License:
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
 */
 
-// public object
+// create the constructor if needed
 var useful = useful || {};
+useful.Cropper = useful.Cropper || function () {};
 
-(function(){
-
-	// invoke strict mode
+// extend the constructor
+useful.Cropper.prototype.init = function (cfg) {
+	// properties
 	"use strict";
-
-	// private functions
-	useful.Cropper = function (obj, cfg) {
-		// properties
-		this.obj = obj;
-		this.cfg = cfg;
-		this.names = ['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'];
-		// components
-		this.busy = new useful.Cropper_Busy(this);
-		this.indicator = new useful.Cropper_Indicator(this);
-		this.toolbar = new useful.Cropper_Toolbar(this);
-		// methods
-		this.start = function () {
-			// store the image
-			this.cfg.image = this.obj.getElementsByTagName('img')[0];
-			// store the hidden fields
-			this.cfg.output = this.obj.getElementsByTagName('input');
-			this.cfg.values = null;
-			// validate presets
-			this.cfg.onchange = this.cfg.onchange || function () {};
-			this.cfg.delay = this.cfg.delay || 1000;
-			this.cfg.timeout = null;
-			this.cfg.realtime = this.cfg.realtime || false;
-			this.cfg.minimum = this.cfg.minimum || 0.2;
-			this.cfg.crop = this.cfg.crop || [0.1, 0.1, 0.9, 0.9];
-			this.cfg.url = this.cfg.image.src;
-			this.cfg.offset = this.cfg.offset || 4;
-			this.cfg.reset = [this.cfg.left, this.cfg.top, this.cfg.right, this.cfg.bottom];
-			// build the busy message
-			this.busy.build();
-			// build the indicator
-			this.indicator.build();
-			// build the toolbar
-			if (!this.cfg.realtime) {
-				this.toolbar.build();
-			}
-			// ask the indicator to update after the image loads
-			this.loaded();
-			// disable the start function so it can't be started twice
-			this.start = function () {};
-		};
-		this.loaded = function () {
-			// if the image has loaded
-			if (this.cfg.image.offsetWidth > 0 && this.cfg.image.offsetHeight > 0) {
+	this.cfg = cfg;
+	this.cfg.names = ['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'];
+	this.cfg.image = cfg.element.getElementsByTagName('img')[0];
+	this.cfg.output = cfg.element.getElementsByTagName('input');
+	this.cfg.values = null;
+	this.cfg.onchange = cfg.onchange || function () {};
+	this.cfg.delay = cfg.delay || 1000;
+	this.cfg.timeout = null;
+	this.cfg.realtime = cfg.realtime || false;
+	this.cfg.minimum = cfg.minimum || 0.2;
+	this.cfg.crop = cfg.crop || [0.1, 0.1, 0.9, 0.9];
+	this.cfg.url = cfg.image.src;
+	this.cfg.offset = cfg.offset || 4;
+	this.cfg.reset = [cfg.left, cfg.top, cfg.right, cfg.bottom];
+	// components
+	this.busy = new this.Busy(this);
+	this.indicator = new this.Indicator(this);
+	this.toolbar = new this.Toolbar(this);
+	// methods
+	this.watch = function () {
+		var cfg = this.cfg;
+		// if the image has loaded
+		if (cfg.image.offsetWidth > 0 && cfg.image.offsetHeight > 0) {
+			// update the indicator
+			this.update();
+			this.preset();
+		// else
+		} else {
+			// wait for the image to load
+			var context = this;
+			cfg.image.onload = function () {
 				// update the indicator
-				this.update();
-				this.preset();
-			// else
-			} else {
-				// wait for the image to load
-				var context = this;
-				this.cfg.image.onload = function () {
-					// update the indicator
-					context.update();
-					context.preset();
-				};
-			}
-		};
-		this.preset = function () {
-			var query, width, height, aspect;
-			// if there's anything to measure yet
-			if (this.cfg.image.offsetWidth) {
-				// retrieve the crop coordinates from the url
-				query = useful.urls.load(this.cfg.url);
-				// if we started out with a cropped image
-				if (query.left > 0 || query.top > 0 || query.right < 1 || query.bottom < 1) {
-					// validate the input
-					query.left = query.left || 0;
-					query.top = query.top || 0;
-					query.right = query.right || 1;
-					query.bottom = query.bottom || 1;
-					// store the cropping dimensions
-					this.cfg.left = query.left;
-					this.cfg.top = query.top;
-					this.cfg.right = query.right;
-					this.cfg.bottom = query.bottom;
-					// guess what the original dimensions could have been
-					width = this.cfg.image.offsetWidth / (this.cfg.right - this.cfg.left);
-					height = this.cfg.image.offsetHeight / (this.cfg.bottom - this.cfg.top);
-					aspect = height / width;
-					// scale to the available space
-					width = this.obj.offsetWidth;
-					height = Math.round(width * aspect);
-					// limit the image's size to the original parent
-					this.cfg.image.style.maxWidth = width + 'px';
-					this.cfg.image.style.maxHeight = height + 'px';
-					// guess what the reset url of the uncropped image might have been
-					this.cfg.url = useful.urls.replace(this.cfg.url, 'width', width);
-					this.cfg.url = useful.urls.replace(this.cfg.url, 'height', height);
-					this.cfg.url = useful.urls.replace(this.cfg.url, 'left', 0);
-					this.cfg.url = useful.urls.replace(this.cfg.url, 'top', 0);
-					this.cfg.url = useful.urls.replace(this.cfg.url, 'right', 1);
-					this.cfg.url = useful.urls.replace(this.cfg.url, 'bottom', 1);
-					// restore the container's original size
-					this.obj.style.width = width + 'px';
-					this.obj.style.height = height + 'px';
-					// if continuous updates are on
-					if (this.cfg.realtime) {
-						// load the original image
-						var context = this;
-						this.cfg.image.onload = function () { context.update(); };
-						this.cfg.image.src = this.cfg.url;
-						this.cfg.overlay.style.background = 'url(' + this.cfg.url + ')';
-					} else {
-						// set the image to center
-						this.cfg.image.style.marginTop = Math.round((this.obj.offsetHeight - this.cfg.image.offsetHeight - this.cfg.offset) / 2) + 'px';
-						// disable the indicator
-						this.cfg.applyButton.disabled = true;
-						this.obj.className = this.obj.className.replace(' cr-disabled', '') + ' cr-disabled';
-					}
+				context.update();
+				context.preset();
+			};
+		}
+	};
+	this.preset = function () {
+		var query, width, height, aspect, cfg = this.cfg;
+		// if there's anything to measure yet
+		if (cfg.image.offsetWidth) {
+			// retrieve the crop coordinates from the url
+			query = useful.urls.load(cfg.url);
+			// if we started out with a cropped image
+			if (query.left > 0 || query.top > 0 || query.right < 1 || query.bottom < 1) {
+				// validate the input
+				query.left = query.left || 0;
+				query.top = query.top || 0;
+				query.right = query.right || 1;
+				query.bottom = query.bottom || 1;
+				// store the cropping dimensions
+				cfg.left = query.left;
+				cfg.top = query.top;
+				cfg.right = query.right;
+				cfg.bottom = query.bottom;
+				// guess what the original dimensions could have been
+				width = cfg.image.offsetWidth / (cfg.right - cfg.left);
+				height = cfg.image.offsetHeight / (cfg.bottom - cfg.top);
+				aspect = height / width;
+				// scale to the available space
+				width = cfg.element.offsetWidth;
+				height = Math.round(width * aspect);
+				// limit the image's size to the original parent
+				cfg.image.style.maxWidth = width + 'px';
+				cfg.image.style.maxHeight = height + 'px';
+				// guess what the reset url of the uncropped image might have been
+				cfg.url = useful.urls.replace(cfg.url, 'width', width);
+				cfg.url = useful.urls.replace(cfg.url, 'height', height);
+				cfg.url = useful.urls.replace(cfg.url, 'left', 0);
+				cfg.url = useful.urls.replace(cfg.url, 'top', 0);
+				cfg.url = useful.urls.replace(cfg.url, 'right', 1);
+				cfg.url = useful.urls.replace(cfg.url, 'bottom', 1);
+				// restore the container's original size
+				cfg.element.style.width = width + 'px';
+				cfg.element.style.height = height + 'px';
+				// if continuous updates are on
+				if (cfg.realtime) {
+					// load the original image
+					var context = this;
+					cfg.image.onload = function () { context.update(); };
+					cfg.image.src = cfg.url;
+					cfg.overlay.style.background = 'url(' + cfg.url + ')';
+				} else {
+					// set the image to center
+					cfg.image.style.marginTop = Math.round((cfg.element.offsetHeight - cfg.image.offsetHeight - cfg.offset) / 2) + 'px';
+					// disable the indicator
+					cfg.applyButton.disabled = true;
+					cfg.element.className = cfg.element.className.replace(' cr-disabled', '') + ' cr-disabled';
 				}
 			}
-		};
-		this.correct = function (handle) {
-			// determine the dominant motion
-			var dLeft = Math.abs(this.cfg.values.left - this.cfg.left),
-				dTop = Math.abs(this.cfg.values.top - this.cfg.top),
-				dRight = Math.abs(this.cfg.values.right - this.cfg.right),
-				dBottom = Math.abs(this.cfg.values.bottom - this.cfg.bottom),
-				aspect = this.cfg.aspect;
-			// implement the aspect ratio from the required corner
-			switch (handle) {
-				case 'tl' :
-					if (dLeft > dTop) { this.cfg.top = this.cfg.bottom - (this.cfg.right - this.cfg.left) * aspect; }
-					else { this.cfg.left = this.cfg.right - (this.cfg.bottom - this.cfg.top) / aspect; }
-					break;
-				case 'tc' :
-					this.cfg.right = this.cfg.left + (this.cfg.bottom - this.cfg.top) / aspect;
-					break;
-				case 'tr' :
-					if (dRight > dTop) { this.cfg.top = this.cfg.bottom - (this.cfg.right - this.cfg.left) * aspect; }
-					else { this.cfg.right = this.cfg.left + (this.cfg.bottom - this.cfg.top) / aspect;  }
-					break;
-				case 'ml' :
-					this.cfg.bottom = this.cfg.top + (this.cfg.right - this.cfg.left) * aspect;
-					break;
-				case 'mr' :
-					this.cfg.bottom = this.cfg.top + (this.cfg.right - this.cfg.left) * aspect;
-					break;
-				case 'bl' :
-					if (dLeft > dBottom) { this.cfg.bottom = this.cfg.top + (this.cfg.right - this.cfg.left) * aspect; }
-					else { this.cfg.left = this.cfg.right - (this.cfg.bottom - this.cfg.top) / aspect; }
-					break;
-				case 'bc' :
-					this.cfg.right = this.cfg.left + (this.cfg.bottom - this.cfg.top) / aspect;
-					break;
-				case 'br' :
-					if (dRight > dBottom) { this.cfg.bottom = this.cfg.top + (this.cfg.right - this.cfg.left) * aspect; }
-					else { this.cfg.right = this.cfg.left + (this.cfg.bottom - this.cfg.top) / aspect; }
-					break;
-			}
-		};
-		this.update = function (values, changed, handle) {
-			changed = (changed === true);
-			// process any override values
-			if (values && values.left) { this.cfg.left = values.left; }
-			if (values && values.top) { this.cfg.top = values.top; }
-			if (values && values.right) { this.cfg.right = values.right; }
-			if (values && values.bottom) { this.cfg.bottom = values.bottom; }
-			// correct the values for aspect ratio
-			if (this.cfg.aspect && this.cfg.values && handle) { this.correct(handle); }
-			// refresh the hidden fields
-			this.cfg.output[0].value = this.cfg.left;
-			this.cfg.output[1].value = this.cfg.top;
-			this.cfg.output[2].value = this.cfg.right;
-			this.cfg.output[3].value = this.cfg.bottom;
-			// refresh the json object of values
-			this.cfg.values = {
-				'left' : this.cfg.left,
-				'top' : this.cfg.top,
-				'right' : this.cfg.right,
-				'bottom' : this.cfg.bottom
-			};
-			// redraw the indicator
-			this.indicator.update(this);
-			// update the onchange event periodically
-			if (changed && this.cfg.realtime) {
-				clearTimeout(this.cfg.timeout);
-				var context = this;
-				this.cfg.timeout = setTimeout(function () {
-					context.cfg.onchange(context.cfg.values);
-				}, this.cfg.delay);
-			}
-		};
-		// go
-		this.start();
+		}
 	};
+	this.correct = function (handle) {
+		var cfg = this.cfg;
+		// determine the dominant motion
+		var dLeft = Math.abs(cfg.values.left - cfg.left),
+			dTop = Math.abs(cfg.values.top - cfg.top),
+			dRight = Math.abs(cfg.values.right - cfg.right),
+			dBottom = Math.abs(cfg.values.bottom - cfg.bottom),
+			aspect = cfg.aspect;
+		// implement the aspect ratio from the required corner
+		switch (handle) {
+			case 'tl' :
+				if (dLeft > dTop) { cfg.top = cfg.bottom - (cfg.right - cfg.left) * aspect; }
+				else { cfg.left = cfg.right - (cfg.bottom - cfg.top) / aspect; }
+				break;
+			case 'tc' :
+				cfg.right = cfg.left + (cfg.bottom - cfg.top) / aspect;
+				break;
+			case 'tr' :
+				if (dRight > dTop) { cfg.top = cfg.bottom - (cfg.right - cfg.left) * aspect; }
+				else { cfg.right = cfg.left + (cfg.bottom - cfg.top) / aspect;  }
+				break;
+			case 'ml' :
+				cfg.bottom = cfg.top + (cfg.right - cfg.left) * aspect;
+				break;
+			case 'mr' :
+				cfg.bottom = cfg.top + (cfg.right - cfg.left) * aspect;
+				break;
+			case 'bl' :
+				if (dLeft > dBottom) { cfg.bottom = cfg.top + (cfg.right - cfg.left) * aspect; }
+				else { cfg.left = cfg.right - (cfg.bottom - cfg.top) / aspect; }
+				break;
+			case 'bc' :
+				cfg.right = cfg.left + (cfg.bottom - cfg.top) / aspect;
+				break;
+			case 'br' :
+				if (dRight > dBottom) { cfg.bottom = cfg.top + (cfg.right - cfg.left) * aspect; }
+				else { cfg.right = cfg.left + (cfg.bottom - cfg.top) / aspect; }
+				break;
+		}
+	};
+	this.update = function (values, changed, handle) {
+		var cfg = this.cfg;
+		changed = (changed === true);
+		// process any override values
+		if (values && values.left) { cfg.left = values.left; }
+		if (values && values.top) { cfg.top = values.top; }
+		if (values && values.right) { cfg.right = values.right; }
+		if (values && values.bottom) { cfg.bottom = values.bottom; }
+		// correct the values for aspect ratio
+		if (cfg.aspect && cfg.values && handle) { this.correct(handle); }
+		// refresh the hidden fields
+		cfg.output[0].value = cfg.left;
+		cfg.output[1].value = cfg.top;
+		cfg.output[2].value = cfg.right;
+		cfg.output[3].value = cfg.bottom;
+		// refresh the json object of values
+		cfg.values = {
+			'left' : cfg.left,
+			'top' : cfg.top,
+			'right' : cfg.right,
+			'bottom' : cfg.bottom
+		};
+		// redraw the indicator
+		this.indicator.update(this);
+		// update the onchange event periodically
+		if (changed && cfg.realtime) {
+			clearTimeout(cfg.timeout);
+			var context = this;
+			cfg.timeout = setTimeout(function () {
+				context.cfg.onchange(context.cfg.values);
+			}, cfg.delay);
+		}
+	};
+	// startup
+	this.watch();
+	this.init = function () {};
+	return this;
+};
 
-	// return as a require.js module
-	if (typeof module !== 'undefined') {
-		exports = module.exports = useful.Cropper;
-	}
-
-})();
+// return as a require.js module
+if (typeof module !== 'undefined') {
+	exports = module.exports = useful.Cropper;
+}

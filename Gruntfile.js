@@ -3,8 +3,9 @@ module.exports = function(grunt) {
 	// components
 	var name = 'cropper';
 	var libs = [
-		'../useful-instances/src/js/useful-instances.js',
 		'../useful-gestures/src/js/useful-gestures.js',
+		'../useful-gestures/src/js/useful-gestures-multi.js',
+		'../useful-gestures/src/js/useful-gestures-single.js',
 		'../useful-polyfills/src/js/useful-polyfills.js',
 		'../useful-urls/src/js/useful-urls.js'
 	];
