@@ -414,7 +414,7 @@ useful.Gestures.prototype.Single = function (parent) {
 			// get event object
 			event = event || window.event;
 			// optionally cancel the default behaviour
-			context.cancelGesture(event);
+			context.cancelTouch(event);
 			// handle the event
 			context.changeWheel(event);
 		};
@@ -963,1194 +963,600 @@ var useful = useful || {};
 })();
 
 /*
-
 	Source:
-
 	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
 
-
-
 	License:
-
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
 */
 
-
-
 // create the constructor if needed
-
 var useful = useful || {};
-
 useful.Cropper = useful.Cropper || function () {};
 
-
-
 // extend the constructor
-
 useful.Cropper.prototype.Busy = function (parent) {
-
 	// properties
-
 	"use strict";
-
 	this.parent = parent;
-
 	// methods
-
 	this.build = function () {
-
 		var cfg = this.parent.cfg;
-
 		// add a busy message
-
 		this.spinner = document.createElement('span');
-
 		this.spinner.className = 'cr-busy';
-
 		this.spinner.innerHTML = 'Please wait...';
-
 		this.spinner.style.visibility = 'hidden';
-
 		cfg.element.appendChild(this.spinner);
-
 	};
-
 	this.show = function () {
-
 		// show the busy message
-
 		this.spinner.style.visibility = 'visible';
-
 	};
-
 	this.hide = function () {
-
 		// show the busy message
-
 		this.spinner.style.visibility = 'hidden';
-
 	};
-
 	// build the busy message
-
 	this.build();
-
 };
 
-
-
 // return as a require.js module
-
 if (typeof module !== 'undefined') {
-
 	exports = module.exports = useful.Cropper.Busy;
-
 }
 
-
 /*
-
 	Source:
-
 	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
 
-
-
 	License:
-
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
 */
 
-
-
 // create the constructor if needed
-
 var useful = useful || {};
-
 useful.Cropper = useful.Cropper || function () {};
 
-
-
 // extend the constructor
-
 useful.Cropper.prototype.Handles = function (parent) {
-
 	// properties
-
 	"use strict";
-
 	this.parent = parent;
-
 	this.root = parent.parent;
-
 	// methods
-
 	this.build = function () {
-
 		var cfg = this.root.cfg;
-
 		var a, b, name;
-
 		// create the handles
-
 		cfg.handles = {};
-
 		for (a = 0, b = cfg.names.length; a < b; a += 1) {
-
 			name = cfg.names[a];
-
 			cfg.handles[name] = document.createElement('span');
-
 			cfg.handles[name].className = 'cr-' + name;
-
 			cfg.overlay.appendChild(cfg.handles[name]);
-
 		}
-
 	};
-
 	this.left = function (distance) {
-
 		var cfg = this.root.cfg;
-
 		var horizontal, left, right, limit;
-
 		// measure the movement in fractions of the dimensions
-
 		horizontal = distance / cfg.width;
-
 		// calculate the new crop fractions
-
 		left = cfg.left + horizontal;
-
 		right = cfg.right + horizontal;
-
 		limit = cfg.right - cfg.minimum;
-
 		// if all are within limits
-
 		if (left >= 0 && left < limit) {
-
 			// apply the movement to the crop fractions
-
 			cfg.left = left;
-
 		}
-
 	};
-
 	this.top = function (distance) {
-
 		var cfg = this.root.cfg;
-
 		var vertical, top, bottom, limit;
-
 		// measure the movement in fractions of the dimensions
-
 		vertical = distance / cfg.height;
-
 		// calculate the new crop fractions
-
 		top = cfg.top + vertical;
-
 		bottom = cfg.bottom + vertical;
-
 		limit = cfg.bottom - cfg.minimum;
-
 		// if all are within limits
-
 		if (top >= 0 && top < limit) {
-
 			// apply the movement to the crop fractions
-
 			cfg.top = top;
-
 		}
-
 	};
-
 	this.right = function (distance) {
-
 		var cfg = this.root.cfg;
-
 		var horizontal, left, right, limit;
-
 		// measure the movement in fractions of the dimensions
-
 		horizontal = distance / cfg.width;
-
 		// calculate the new crop fractions
-
 		left = cfg.left + horizontal;
-
 		right = cfg.right + horizontal;
-
 		limit = cfg.left + cfg.minimum;
-
 		// if all are within limits
-
 		if (right <= 1 && right > limit) {
-
 			// apply the movement to the crop fractions
-
 			cfg.right = right;
-
 		}
-
 	};
-
 	this.bottom = function (distance) {
-
 		var cfg = this.root.cfg;
-
 		var vertical, top, bottom, limit;
-
 		// measure the movement in fractions of the dimensions
-
 		vertical = distance / cfg.height;
-
 		// calculate the new crop fractions
-
 		top = cfg.top + vertical;
-
 		bottom = cfg.bottom + vertical;
-
 		limit = cfg.top + cfg.minimum;
-
 		// if all are within limits
-
 		if (bottom <= 1 && bottom > limit) {
-
 			// apply the movement to the crop fractions
-
 			cfg.bottom = bottom;
-
 		}
-
 	};
-
 	// build the handles
-
 	this.build();
-
 };
 
-
-
 // return as a require.js module
-
 if (typeof module !== 'undefined') {
-
 	exports = module.exports = useful.Cropper.Indicator.Handles;
-
 }
 
-
 /*
-
 	Source:
-
 	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
 
-
-
 	License:
-
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
 */
 
-
-
 // create the constructor if needed
-
 var useful = useful || {};
-
 useful.Cropper = useful.Cropper || function () {};
 
-
-
 // extend the constructor
-
 useful.Cropper.prototype.Indicator = function (parent) {
-
 	// properties
-
 	"use strict";
-
 	this.parent = parent;
-
 	// methods
-
 	this.build = function () {
-
 		var cfg = this.parent.cfg;
-
 		// create the indicator
-
 		cfg.overlay = document.createElement('span');
-
 		cfg.overlay.className = 'cr-overlay';
-
 		cfg.overlay.style.background = 'url(' + cfg.image.src + ')';
-
 		// create the handles
-
 		this.handles = new this.parent.Handles(this);
-
 		// add the indicator to the parent
-
 		cfg.element.appendChild(cfg.overlay);
-
 		// add the interaction
-
 		var context = this;
-
 		var gestures = new useful.Gestures().init({
-
 			'element' : cfg.overlay.parentNode,
-
 			'threshold' : 50,
-
 			'increment' : 0.1,
-
 			'cancelTouch' : true,
-
 			'cancelGesture' : true,
-
 			'drag' : function (metrics) {
-
 				// move the handles
-
 				switch (metrics.source.className) {
-
 					case 'cr-tl' :
-
 						context.handles.left(metrics.horizontal);
-
 						context.handles.top(metrics.vertical);
-
 						context.parent.update(null, true, 'tl');
-
 						break;
-
 					case 'cr-tc' :
-
 						context.handles.top(metrics.vertical);
-
 						context.parent.update(null, true, 'tc');
-
 						break;
-
 					case 'cr-tr' :
-
 						context.handles.right(metrics.horizontal);
-
 						context.handles.top(metrics.vertical);
-
 						context.parent.update(null, true, 'tr');
-
 						break;
-
 					case 'cr-ml' :
-
 						context.handles.left(metrics.horizontal);
-
 						context.parent.update(null, true, 'ml');
-
 						break;
-
 					case 'cr-mr' :
-
 						context.handles.right(metrics.horizontal);
-
 						context.parent.update(null, true, 'mr');
-
 						break;
-
 					case 'cr-bl' :
-
 						context.handles.left(metrics.horizontal);
-
 						context.handles.bottom(metrics.vertical);
-
 						context.parent.update(null, true, 'bl');
-
 						break;
-
 					case 'cr-bc' :
-
 						context.handles.bottom(metrics.vertical);
-
 						context.parent.update(null, true, 'bc');
-
 						break;
-
 					case 'cr-br' :
-
 						context.handles.right(metrics.horizontal);
-
 						context.handles.bottom(metrics.vertical);
-
 						context.parent.update(null, true, 'br');
-
 						break;
-
 					default :
-
 						context.move(metrics.horizontal, metrics.vertical);
-
 						context.parent.update(null, true, null);
-
 				}
-
 			}
-
 		});
-
 	};
-
 	this.update = function () {
-
 		var cfg = this.parent.cfg;
-
 		var left, top, right, bottom;
-
 		// get the dimensions of the component
-
 		cfg.width = cfg.image.offsetWidth;
-
 		cfg.height = cfg.image.offsetHeight;
-
 		// convert the crop fractions into pixel values
-
 		left = cfg.left * cfg.width;
-
 		top = cfg.top * cfg.height;
-
 		right = cfg.width - cfg.right * cfg.width;
-
 		bottom = cfg.height - cfg.bottom * cfg.height;
-
 		// reposition the indicator
-
 		cfg.overlay.style.left = left + 'px';
-
 		cfg.overlay.style.top = top + 'px';
-
 		cfg.overlay.style.right = right + 'px';
-
 		cfg.overlay.style.bottom = bottom + 'px';
-
 		// reposition the background image
-
 		cfg.overlay.style.backgroundPosition = '-' + left + 'px -' + top + 'px';
-
 	};
-
 	this.move = function (x, y) {
-
 		var cfg = this.parent.cfg;
-
 		var horizontal, vertical, left, top, right, bottom;
-
 		// measure the movement in fractions of the dimensions
-
 		horizontal = x / cfg.width;
-
 		vertical = y / cfg.height;
-
 		// calculate the new crop fractions
-
 		left = cfg.left + horizontal;
-
 		top = cfg.top + vertical;
-
 		right = cfg.right + horizontal;
-
 		bottom = cfg.bottom + vertical;
-
 		// if all are within limits
-
 		if (left >= 0 && top >= 0 && right <= 1 && bottom <= 1 && left < right && top < bottom) {
-
 			// apply the movement to the crop fractions
-
 			cfg.left = left;
-
 			cfg.top = top;
-
 			cfg.right = right;
-
 			cfg.bottom = bottom;
-
 		}
-
 	};
-
 	// build the indicator
-
 	this.build();
-
 };
 
-
-
 // return as a require.js module
-
 if (typeof module !== 'undefined') {
-
 	exports = module.exports = useful.Cropper.Indicator;
-
 }
 
-
 /*
-
 	Source:
-
 	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
 
-
-
 	License:
-
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
 */
 
-
-
 // create the constructor if needed
-
 var useful = useful || {};
-
 useful.Cropper = useful.Cropper || function () {};
 
-
-
 // extend the constructor
-
 useful.Cropper.prototype.Toolbar = function (parent) {
-
 	// properties
-
 	"use strict";
-
 	this.parent = parent;
-
 	this.ui = {};
-
 	// methods
-
 	this.build = function () {
-
 		var cfg = this.parent.cfg;
-
 		var context = this;
-
 		// create the toolbar
-
 		cfg.toolbar = document.createElement('figcaption');
-
 		// create the apply button
-
 		cfg.applyButton = document.createElement('button');
-
 		cfg.applyButton.setAttribute('type', 'button');
-
 		cfg.applyButton.className = 'cr-apply button';
-
 		cfg.applyButton.innerHTML = 'Apply';
-
 		cfg.toolbar.appendChild(cfg.applyButton);
-
 		cfg.applyButton.onclick = function () {
-
 			context.apply();
-
 		};
-
 		// create the reset button
-
 		cfg.resetButton = document.createElement('button');
-
 		cfg.resetButton.setAttribute('type', 'button');
-
 		cfg.resetButton.className = 'cr-reset button';
-
 		cfg.resetButton.innerHTML = 'Reset';
-
 		cfg.toolbar.appendChild(cfg.resetButton);
-
 		cfg.resetButton.onclick = function () {
-
 			context.reset();
-
 		};
-
 		// add the toolbar
-
 		cfg.element.appendChild(cfg.toolbar);
-
 	};
-
 	this.apply = function () {
-
 		var cfg = this.parent.cfg;
-
 		var src, width, height, aspect;
-
 		var context = this;
-
 		// normalise the dimensions
-
 		width = cfg.overlay.offsetWidth;
-
 		height = cfg.overlay.offsetHeight;
-
 		aspect = cfg.element.offsetHeight / cfg.element.offsetWidth;
-
 		if (height / width < aspect) {
-
 			height = cfg.image.offsetWidth / width * cfg.overlay.offsetHeight;
-
 			width = cfg.image.offsetWidth;
-
 		} else {
-
 			width = cfg.image.offsetHeight / height * cfg.overlay.offsetWidth;
-
 			height = cfg.image.offsetHeight;
-
 		}
-
 		// fix the container
-
 		cfg.element.style.width = cfg.image.offsetWidth + 'px';
-
 		cfg.element.style.height = cfg.image.offsetHeight + 'px';
-
 		// show busy message
-
 		this.parent.busy.show();
-
 		// upon loading
-
 		cfg.image.onload = function () {
-
 			// set the image to center
-
 			cfg.image.style.marginTop = Math.round((cfg.element.offsetHeight - cfg.image.offsetHeight - cfg.offset) / 2) + 'px';
-
 			// hide the busy message
-
 			context.parent.busy.hide();
-
 		};
-
 		// round the numbers
-
 		width = Math.round(width);
-
 		height = Math.round(height);
-
 		// replace the image with a cropped version
-
 		src = cfg.image.src;
-
 		src = useful.urls.replace(src, 'width', width);
-
 		src = useful.urls.replace(src, 'height', height);
-
 		src = useful.urls.replace(src, 'left', cfg.left);
-
 		src = useful.urls.replace(src, 'top', cfg.top);
-
 		src = useful.urls.replace(src, 'right', cfg.right);
-
 		src = useful.urls.replace(src, 'bottom', cfg.bottom);
-
 		src = useful.urls.replace(src, 'time', new Date().getTime());
-
 		cfg.image.src = src;
-
 		// disable the indicator
-
 		cfg.applyButton.disabled = true;
-
 		cfg.element.className = cfg.element.className.replace(' cr-disabled', '') + ' cr-disabled';
-
 		// trigger any external onchange event
-
 		cfg.onchange(cfg.values);
-
 		// cancel the click
-
 		return false;
-
 	};
-
 	this.reset = function () {
-
 		var cfg = this.parent.cfg;
-
 		var context = this;
-
 		// show busy message
-
 		this.parent.busy.show();
-
 		// upon loading
-
 		cfg.image.onload = function () {
-
 			// undo the margin
-
 			cfg.image.style.marginTop = 0;
-
 			// undo the values
-
 			cfg.left = cfg.reset[0];
-
 			cfg.top = cfg.reset[1];
-
 			cfg.right = cfg.reset[2];
-
 			cfg.bottom = cfg.reset[3];
-
 			// reset the indicator
-
 			context.parent.update();
-
 			// enable the indicator
-
 			cfg.applyButton.disabled = false;
-
 			cfg.element.className = cfg.element.className.replace(' cr-disabled', '');
-
 			// hide the busy message
-
 			context.parent.busy.hide();
-
 		};
-
 		// replace the image with an uncropped version
-
 		cfg.url = useful.urls.replace(cfg.url, 'name', new Date().getTime());
-
 		cfg.image.src =  cfg.url;
-
 		cfg.overlay.style.backgroundImage = 'url(' + cfg.url + ')';
-
 		// trigger any external onchange event
-
 		cfg.onchange(cfg.values);
-
 		// cancel the click
-
 		return false;
-
 	};
-
 	// build the toolbar
-
 	if (!this.parent.cfg.realtime) { this.build(); }
-
 };
 
-
-
 // return as a require.js module
-
 if (typeof module !== 'undefined') {
-
 	exports = module.exports = useful.Cropper.Toolbar;
-
 }
-
 
 /*
-
 	Source:
-
 	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
 
-
-
 	License:
-
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-
 */
 
-
-
 // create the constructor if needed
-
 var useful = useful || {};
-
 useful.Cropper = useful.Cropper || function () {};
 
-
-
 // extend the constructor
-
 useful.Cropper.prototype.init = function (cfg) {
-
 	// properties
-
 	"use strict";
-
 	this.cfg = cfg;
-
 	this.cfg.names = ['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'];
-
 	this.cfg.image = cfg.element.getElementsByTagName('img')[0];
-
 	this.cfg.output = cfg.element.getElementsByTagName('input');
-
 	this.cfg.values = null;
-
 	this.cfg.onchange = cfg.onchange || function () {};
-
 	this.cfg.delay = cfg.delay || 1000;
-
 	this.cfg.timeout = null;
-
 	this.cfg.realtime = cfg.realtime || false;
-
 	this.cfg.minimum = cfg.minimum || 0.2;
-
 	this.cfg.crop = cfg.crop || [0.1, 0.1, 0.9, 0.9];
-
 	this.cfg.url = cfg.image.src;
-
 	this.cfg.offset = cfg.offset || 4;
-
 	this.cfg.reset = [cfg.left, cfg.top, cfg.right, cfg.bottom];
-
 	// components
-
 	this.busy = new this.Busy(this);
-
 	this.indicator = new this.Indicator(this);
-
 	this.toolbar = new this.Toolbar(this);
-
 	// methods
-
 	this.watch = function () {
-
 		var cfg = this.cfg;
-
 		// if the image has loaded
-
 		if (cfg.image.offsetWidth > 0 && cfg.image.offsetHeight > 0) {
-
 			// update the indicator
-
 			this.update();
-
 			this.preset();
-
 		// else
-
 		} else {
-
 			// wait for the image to load
-
 			var context = this;
-
 			cfg.image.onload = function () {
-
 				// update the indicator
-
 				context.update();
-
 				context.preset();
-
 			};
-
 		}
-
 	};
-
 	this.preset = function () {
-
 		var query, width, height, aspect, cfg = this.cfg;
-
 		// if there's anything to measure yet
-
 		if (cfg.image.offsetWidth) {
-
 			// retrieve the crop coordinates from the url
-
 			query = useful.urls.load(cfg.url);
-
 			// if we started out with a cropped image
-
 			if (query.left > 0 || query.top > 0 || query.right < 1 || query.bottom < 1) {
-
 				// validate the input
-
 				query.left = query.left || 0;
-
 				query.top = query.top || 0;
-
 				query.right = query.right || 1;
-
 				query.bottom = query.bottom || 1;
-
 				// store the cropping dimensions
-
 				cfg.left = query.left;
-
 				cfg.top = query.top;
-
 				cfg.right = query.right;
-
 				cfg.bottom = query.bottom;
-
 				// guess what the original dimensions could have been
-
 				width = cfg.image.offsetWidth / (cfg.right - cfg.left);
-
 				height = cfg.image.offsetHeight / (cfg.bottom - cfg.top);
-
 				aspect = height / width;
-
 				// scale to the available space
-
 				width = cfg.element.offsetWidth;
-
 				height = Math.round(width * aspect);
-
 				// limit the image's size to the original parent
-
 				cfg.image.style.maxWidth = width + 'px';
-
 				cfg.image.style.maxHeight = height + 'px';
-
 				// guess what the reset url of the uncropped image might have been
-
 				cfg.url = useful.urls.replace(cfg.url, 'width', width);
-
 				cfg.url = useful.urls.replace(cfg.url, 'height', height);
-
 				cfg.url = useful.urls.replace(cfg.url, 'left', 0);
-
 				cfg.url = useful.urls.replace(cfg.url, 'top', 0);
-
 				cfg.url = useful.urls.replace(cfg.url, 'right', 1);
-
 				cfg.url = useful.urls.replace(cfg.url, 'bottom', 1);
-
 				// restore the container's original size
-
 				cfg.element.style.width = width + 'px';
-
 				cfg.element.style.height = height + 'px';
-
 				// if continuous updates are on
-
 				if (cfg.realtime) {
-
 					// load the original image
-
 					var context = this;
-
 					cfg.image.onload = function () { context.update(); };
-
 					cfg.image.src = cfg.url;
-
 					cfg.overlay.style.background = 'url(' + cfg.url + ')';
-
 				} else {
-
 					// set the image to center
-
 					cfg.image.style.marginTop = Math.round((cfg.element.offsetHeight - cfg.image.offsetHeight - cfg.offset) / 2) + 'px';
-
 					// disable the indicator
-
 					cfg.applyButton.disabled = true;
-
 					cfg.element.className = cfg.element.className.replace(' cr-disabled', '') + ' cr-disabled';
-
 				}
-
 			}
-
 		}
-
 	};
-
 	this.correct = function (handle) {
-
 		var cfg = this.cfg;
-
 		// determine the dominant motion
-
 		var dLeft = Math.abs(cfg.values.left - cfg.left),
-
 			dTop = Math.abs(cfg.values.top - cfg.top),
-
 			dRight = Math.abs(cfg.values.right - cfg.right),
-
 			dBottom = Math.abs(cfg.values.bottom - cfg.bottom),
-
 			aspect = cfg.aspect;
-
 		// implement the aspect ratio from the required corner
-
 		switch (handle) {
-
 			case 'tl' :
-
 				if (dLeft > dTop) { cfg.top = cfg.bottom - (cfg.right - cfg.left) * aspect; }
-
 				else { cfg.left = cfg.right - (cfg.bottom - cfg.top) / aspect; }
-
 				break;
-
 			case 'tc' :
-
 				cfg.right = cfg.left + (cfg.bottom - cfg.top) / aspect;
-
 				break;
-
 			case 'tr' :
-
 				if (dRight > dTop) { cfg.top = cfg.bottom - (cfg.right - cfg.left) * aspect; }
-
 				else { cfg.right = cfg.left + (cfg.bottom - cfg.top) / aspect;  }
-
 				break;
-
 			case 'ml' :
-
 				cfg.bottom = cfg.top + (cfg.right - cfg.left) * aspect;
-
 				break;
-
 			case 'mr' :
-
 				cfg.bottom = cfg.top + (cfg.right - cfg.left) * aspect;
-
 				break;
-
 			case 'bl' :
-
 				if (dLeft > dBottom) { cfg.bottom = cfg.top + (cfg.right - cfg.left) * aspect; }
-
 				else { cfg.left = cfg.right - (cfg.bottom - cfg.top) / aspect; }
-
 				break;
-
 			case 'bc' :
-
 				cfg.right = cfg.left + (cfg.bottom - cfg.top) / aspect;
-
 				break;
-
 			case 'br' :
-
 				if (dRight > dBottom) { cfg.bottom = cfg.top + (cfg.right - cfg.left) * aspect; }
-
 				else { cfg.right = cfg.left + (cfg.bottom - cfg.top) / aspect; }
-
 				break;
-
 		}
-
 	};
-
 	this.update = function (values, changed, handle) {
-
 		var cfg = this.cfg;
-
 		changed = (changed === true);
-
 		// process any override values
-
 		if (values && values.left) { cfg.left = values.left; }
-
 		if (values && values.top) { cfg.top = values.top; }
-
 		if (values && values.right) { cfg.right = values.right; }
-
 		if (values && values.bottom) { cfg.bottom = values.bottom; }
-
 		// correct the values for aspect ratio
-
 		if (cfg.aspect && cfg.values && handle) { this.correct(handle); }
-
 		// refresh the hidden fields
-
 		cfg.output[0].value = cfg.left;
-
 		cfg.output[1].value = cfg.top;
-
 		cfg.output[2].value = cfg.right;
-
 		cfg.output[3].value = cfg.bottom;
-
 		// refresh the json object of values
-
 		cfg.values = {
-
 			'left' : cfg.left,
-
 			'top' : cfg.top,
-
 			'right' : cfg.right,
-
 			'bottom' : cfg.bottom
-
 		};
-
 		// redraw the indicator
-
 		this.indicator.update(this);
-
 		// update the onchange event periodically
-
 		if (changed && cfg.realtime) {
-
 			clearTimeout(cfg.timeout);
-
 			var context = this;
-
 			cfg.timeout = setTimeout(function () {
-
 				context.cfg.onchange(context.cfg.values);
-
 			}, cfg.delay);
-
 		}
-
 	};
-
 	// startup
-
 	this.watch();
-
 	this.init = function () {};
-
 	return this;
-
 };
 
-
-
 // return as a require.js module
-
 if (typeof module !== 'undefined') {
-
 	exports = module.exports = useful.Cropper;
-
 }
-

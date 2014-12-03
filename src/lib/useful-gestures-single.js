@@ -196,7 +196,7 @@ useful.Gestures.prototype.Single = function (parent) {
 			// get event object
 			event = event || window.event;
 			// optionally cancel the default behaviour
-			context.cancelGesture(event);
+			context.cancelTouch(event);
 			// handle the event
 			context.changeWheel(event);
 		};
