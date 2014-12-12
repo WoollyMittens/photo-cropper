@@ -11,39 +11,157 @@ var useful = useful || {};
 useful.Gestures = useful.Gestures || function () {};
 
 // extend the constructor
+useful.Gestures.prototype.Main = function (config, context) {
+
+	// PROPERTIES
+
+	"use strict";
+	this.config = config;
+	this.context = context;
+	this.element = config.element;
+	this.paused = false;
+
+	// METHODS
+
+	this.init = function () {
+		// check the configuration properties
+		this.config = this.checkConfig(config);
+		// add the single touch events
+		this.single = new this.context.Single(this).init();
+		// add the multi touch events
+		this.multi = new this.context.Multi(this).init();
+		// return the object
+		return this;
+	};
+
+	this.checkConfig = function (config) {
+		// add default values for missing ones
+		config.threshold = config.threshold || 50;
+		config.increment = config.increment || 0.1;
+		// cancel all events by default
+		if (config.cancelTouch === undefined || config.cancelTouch === null) { config.cancelTouch = true; }
+		if (config.cancelGesture === undefined || config.cancelGesture === null) { config.cancelGesture = true; }
+		// add dummy event handlers for missing ones
+		config.swipeUp = config.swipeUp || function () {};
+		config.swipeLeft = config.swipeLeft || function () {};
+		config.swipeRight = config.swipeRight || function () {};
+		config.swipeDown = config.swipeDown || function () {};
+		config.drag = config.drag || function () {};
+		config.pinch = config.pinch || function () {};
+		config.twist = config.twist || function () {};
+		config.doubleTap = config.doubleTap || function () {};
+		// return the fixed config
+		return config;
+	};
+
+	this.readEvent = function (event) {
+		var coords = {}, offsets;
+		// try all likely methods of storing coordinates in an event
+		if (event.touches && event.touches[0]) {
+			coords.x = event.touches[0].pageX;
+			coords.y = event.touches[0].pageY;
+		} else if (event.pageX !== undefined) {
+			coords.x = event.pageX;
+			coords.y = event.pageY;
+		} else {
+			coords.x = event.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft);
+			coords.y = event.clientY + (document.documentElement.scrollTop || document.body.scrollTop);
+		}
+		return coords;
+	};
+
+	this.correctOffset = function (element) {
+		var offsetX = 0, offsetY = 0;
+		// if there is an offset
+		if (element.offsetParent) {
+			// follow the offsets back to the right parent element
+			while (element !== this.element) {
+				offsetX += element.offsetLeft;
+				offsetY += element.offsetTop;
+				element = element.offsetParent;
+			}
+		}
+		// return the offsets
+		return { 'x' : offsetX, 'y' : offsetY };
+	};
+
+	// EXTERNAL
+
+	this.enableDefaultTouch = function () {
+		this.config.cancelTouch = false;
+	};
+
+	this.disableDefaultTouch = function () {
+		this.config.cancelTouch = true;
+	};
+
+	this.enableDefaultGesture = function () {
+		this.config.cancelGesture = false;
+	};
+
+	this.disableDefaultGesture = function () {
+		this.config.cancelGesture = true;
+	};
+
+};
+
+// return as a require.js module
+if (typeof module !== 'undefined') {
+	exports = module.exports = useful.Gestures.Main;
+}
+
+/*
+	Source:
+	van Creij, Maurice (2014). "useful.gestures.js: A library of useful functions to ease working with touch and gestures.", version 20141127, http://www.woollymittens.nl/.
+
+	License:
+	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+*/
+
+// create the constructor if needed
+var useful = useful || {};
+useful.Gestures = useful.Gestures || function () {};
+
+// extend the constructor
 useful.Gestures.prototype.Multi = function (parent) {
-	// properties
+
+	// PROPERTIES
+
 	"use strict";
 	this.parent = parent;
-	this.cfg = parent.cfg;
-	this.obj = parent.cfg.element;
+	this.config = parent.config;
+	this.element = parent.config.element;
 	this.gestureOrigin = null;
 	this.gestureProgression = null;
-	// methods
-	this.start = function () {
+
+	// METHODS
+
+	this.init = function () {
 		// set the required events for gestures
 		if ('ongesturestart' in window) {
-			this.obj.addEventListener('gesturestart', this.onStartGesture());
-			this.obj.addEventListener('gesturechange', this.onChangeGesture());
-			this.obj.addEventListener('gestureend', this.onEndGesture());
+			this.element.addEventListener('gesturestart', this.onStartGesture());
+			this.element.addEventListener('gesturechange', this.onChangeGesture());
+			this.element.addEventListener('gestureend', this.onEndGesture());
 		} else if ('msgesturestart' in window) {
-			this.obj.addEventListener('msgesturestart', this.onStartGesture());
-			this.obj.addEventListener('msgesturechange', this.onChangeGesture());
-			this.obj.addEventListener('msgestureend', this.onEndGesture());
+			this.element.addEventListener('msgesturestart', this.onStartGesture());
+			this.element.addEventListener('msgesturechange', this.onChangeGesture());
+			this.element.addEventListener('msgestureend', this.onEndGesture());
 		} else {
-			this.obj.addEventListener('touchstart', this.onStartFallback());
-			this.obj.addEventListener('touchmove', this.onChangeFallback());
-			this.obj.addEventListener('touchend', this.onEndFallback());
+			this.element.addEventListener('touchstart', this.onStartFallback());
+			this.element.addEventListener('touchmove', this.onChangeFallback());
+			this.element.addEventListener('touchend', this.onEndFallback());
 		}
-		// disable the start function so it can't be started twice
-		this.init = function () {};
+		// return the object
+		return this;
 	};
+
 	this.cancelGesture = function (event) {
-		if (this.cfg.cancelGesture) {
+		if (this.config.cancelGesture) {
 			event = event || window.event;
 			event.preventDefault();
 		}
 	};
+
 	this.startGesture = function (event) {
 		// if the functionality wasn't paused
 		if (!this.parent.paused) {
@@ -59,6 +177,7 @@ useful.Gestures.prototype.Multi = function (parent) {
 			};
 		}
 	};
+
 	this.changeGesture = function (event) {
 		// if there is an origin
 		if (this.gestureOrigin) {
@@ -68,14 +187,14 @@ useful.Gestures.prototype.Multi = function (parent) {
 			// get the coordinates from the event
 			var coords = this.parent.readEvent(event);
 			// get the gesture parameters
-			this.cfg.pinch({
+			this.config.pinch({
 				'x' : coords.x,
 				'y' : coords.y,
 				'scale' : scale - this.gestureProgression.scale,
 				'event' : event,
 				'target' : this.gestureOrigin.target
 			});
-			this.cfg.twist({
+			this.config.twist({
 				'x' : coords.x,
 				'y' : coords.y,
 				'rotation' : rotation - this.gestureProgression.rotation,
@@ -89,11 +208,14 @@ useful.Gestures.prototype.Multi = function (parent) {
 			};
 		}
 	};
+
 	this.endGesture = function () {
 		// note the start position
 		this.gestureOrigin = null;
 	};
-	// fallback functionality
+
+	// FALLBACK
+
 	this.startFallback = function (event) {
 		// if the functionality wasn't paused
 		if (!this.parent.paused && event.touches.length === 2) {
@@ -110,6 +232,7 @@ useful.Gestures.prototype.Multi = function (parent) {
 			};
 		}
 	};
+
 	this.changeFallback = function (event) {
 		// if there is an origin
 		if (this.gestureOrigin && event.touches.length === 2) {
@@ -121,7 +244,7 @@ useful.Gestures.prototype.Multi = function (parent) {
 			scale += (event.touches[0].pageY - event.touches[1].pageY) / (progression.touches[0].pageY - progression.touches[1].pageY);
 			scale = scale - 2;
 			// get the gesture parameters
-			this.cfg.pinch({
+			this.config.pinch({
 				'x' : coords.x,
 				'y' : coords.y,
 				'scale' : scale,
@@ -137,78 +260,86 @@ useful.Gestures.prototype.Multi = function (parent) {
 			};
 		}
 	};
+
 	this.endFallback = function () {
 		// note the start position
 		this.gestureOrigin = null;
 	};
-	// gesture events
+
+	// GESTURE EVENTS
+
 	this.onStartGesture = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
 			// optionally cancel the default behaviour
-			context.cancelGesture(event);
+			_this.cancelGesture(event);
 			// handle the event
-			context.startGesture(event);
-			context.changeGesture(event);
+			_this.startGesture(event);
+			_this.changeGesture(event);
 		};
 	};
+
 	this.onChangeGesture = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
 			// optionally cancel the default behaviour
-			context.cancelGesture(event);
+			_this.cancelGesture(event);
 			// handle the event
-			context.changeGesture(event);
+			_this.changeGesture(event);
 		};
 	};
+
 	this.onEndGesture = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
 			// handle the event
-			context.endGesture(event);
+			_this.endGesture(event);
 		};
 	};
-	// gesture events
+
+	// FALLBACK EVENTS
+
 	this.onStartFallback = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
 			// optionally cancel the default behaviour
-			//context.cancelGesture(event);
+			//_this.cancelGesture(event);
 			// handle the event
-			context.startFallback(event);
-			context.changeFallback(event);
+			_this.startFallback(event);
+			_this.changeFallback(event);
 		};
 	};
+
 	this.onChangeFallback = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
 			// optionally cancel the default behaviour
-			context.cancelGesture(event);
+			_this.cancelGesture(event);
 			// handle the event
-			context.changeFallback(event);
+			_this.changeFallback(event);
 		};
 	};
+
 	this.onEndFallback = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
 			// handle the event
-			context.endGesture(event);
+			_this.endGesture(event);
 		};
 	};
-	// go
-	this.start();
+
 };
 
 // return as a require.js module
@@ -230,38 +361,44 @@ useful.Gestures = useful.Gestures || function () {};
 
 // extend the constructor
 useful.Gestures.prototype.Single = function (parent) {
-	// properties
+
+	// PROPERTIES
+
 	"use strict";
 	this.parent = parent;
-	this.cfg = parent.cfg;
-	this.obj = parent.cfg.element;
+	this.config = parent.config;
+	this.element = parent.config.element;
 	this.lastTouch = null;
 	this.touchOrigin = null;
 	this.touchProgression = null;
-	// methods
-	this.start = function () {
+
+	// METHODS
+
+	this.init = function () {
 		// set the required events for mouse
-		this.obj.addEventListener('mousedown', this.onStartTouch());
-		this.obj.addEventListener('mousemove', this.onChangeTouch());
+		this.element.addEventListener('mousedown', this.onStartTouch());
+		this.element.addEventListener('mousemove', this.onChangeTouch());
 		document.body.addEventListener('mouseup', this.onEndTouch());
-		this.obj.addEventListener('mousewheel', this.onChangeWheel());
-		if (navigator.userAgent.match(/firefox/gi)) { this.obj.addEventListener('DOMMouseScroll', this.onChangeWheel()); }
+		this.element.addEventListener('mousewheel', this.onChangeWheel());
+		if (navigator.userAgent.match(/firefox/gi)) { this.element.addEventListener('DOMMouseScroll', this.onChangeWheel()); }
 		// set the required events for touch
-		this.obj.addEventListener('touchstart', this.onStartTouch());
-		this.obj.addEventListener('touchmove', this.onChangeTouch());
+		this.element.addEventListener('touchstart', this.onStartTouch());
+		this.element.addEventListener('touchmove', this.onChangeTouch());
 		document.body.addEventListener('touchend', this.onEndTouch());
-		this.obj.addEventListener('mspointerdown', this.onStartTouch());
-		this.obj.addEventListener('mspointermove', this.onChangeTouch());
+		this.element.addEventListener('mspointerdown', this.onStartTouch());
+		this.element.addEventListener('mspointermove', this.onChangeTouch());
 		document.body.addEventListener('mspointerup', this.onEndTouch());
-		// disable the start function so it can't be started twice
-		this.init = function () {};
+		// return the object
+		return this;
 	};
+
 	this.cancelTouch = function (event) {
-		if (this.cfg.cancelTouch) {
+		if (this.config.cancelTouch) {
 			event = event || window.event;
 			event.preventDefault();
 		}
 	};
+
 	this.startTouch = function (event) {
 		// if the functionality wasn't paused
 		if (!this.parent.paused) {
@@ -279,13 +416,14 @@ useful.Gestures.prototype.Single = function (parent) {
 			};
 		}
 	};
+
 	this.changeTouch = function (event) {
 		// if there is an origin
 		if (this.touchOrigin) {
 			// get the coordinates from the event
 			var coords = this.parent.readEvent(event);
 			// get the gesture parameters
-			this.cfg.drag({
+			this.config.drag({
 				'x' : this.touchOrigin.x,
 				'y' : this.touchOrigin.y,
 				'horizontal' : coords.x - this.touchProgression.x,
@@ -300,6 +438,7 @@ useful.Gestures.prototype.Single = function (parent) {
 			};
 		}
 	};
+
 	this.endTouch = function (event) {
 		// if the numbers are valid
 		if (this.touchOrigin && this.touchProgression) {
@@ -317,28 +456,28 @@ useful.Gestures.prototype.Single = function (parent) {
 				new Date().getTime() - this.lastTouch.time > 100
 			) {
 				// treat this as a double tap
-				this.cfg.doubleTap({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'event' : event, 'source' : this.touchOrigin.target});
+				this.config.doubleTap({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'event' : event, 'source' : this.touchOrigin.target});
 			// if the horizontal motion was the largest
 			} else if (Math.abs(distance.x) > Math.abs(distance.y)) {
 				// if there was a right swipe
-				if (distance.x > this.cfg.threshold) {
+				if (distance.x > this.config.threshold) {
 					// report the associated swipe
-					this.cfg.swipeRight({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'distance' : distance.x, 'event' : event, 'source' : this.touchOrigin.target});
+					this.config.swipeRight({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'distance' : distance.x, 'event' : event, 'source' : this.touchOrigin.target});
 				// else if there was a left swipe
-				} else if (distance.x < -this.cfg.threshold) {
+				} else if (distance.x < -this.config.threshold) {
 					// report the associated swipe
-					this.cfg.swipeLeft({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'distance' : -distance.x, 'event' : event, 'source' : this.touchOrigin.target});
+					this.config.swipeLeft({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'distance' : -distance.x, 'event' : event, 'source' : this.touchOrigin.target});
 				}
 			// else
 			} else {
 				// if there was a down swipe
-				if (distance.y > this.cfg.threshold) {
+				if (distance.y > this.config.threshold) {
 					// report the associated swipe
-					this.cfg.swipeDown({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'distance' : distance.y, 'event' : event, 'source' : this.touchOrigin.target});
+					this.config.swipeDown({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'distance' : distance.y, 'event' : event, 'source' : this.touchOrigin.target});
 				// else if there was an up swipe
-				} else if (distance.y < -this.cfg.threshold) {
+				} else if (distance.y < -this.config.threshold) {
 					// report the associated swipe
-					this.cfg.swipeUp({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'distance' : -distance.y, 'event' : event, 'source' : this.touchOrigin.target});
+					this.config.swipeUp({'x' : this.touchOrigin.x, 'y' : this.touchOrigin.y, 'distance' : -distance.y, 'event' : event, 'source' : this.touchOrigin.target});
 				}
 			}
 			// store the history of this touch
@@ -352,15 +491,16 @@ useful.Gestures.prototype.Single = function (parent) {
 		this.touchProgression = null;
 		this.touchOrigin = null;
 	};
+
 	this.changeWheel = function (event) {
 		// measure the wheel distance
 		var scale = 1, distance = ((window.event) ? window.event.wheelDelta / 120 : -event.detail / 3);
 		// get the coordinates from the event
 		var coords = this.parent.readEvent(event);
 		// equate wheeling up / down to zooming in / out
-		scale = (distance > 0) ? +this.cfg.increment : scale = -this.cfg.increment;
+		scale = (distance > 0) ? +this.config.increment : scale = -this.config.increment;
 		// report the zoom
-		this.cfg.pinch({
+		this.config.pinch({
 			'x' : coords.x,
 			'y' : coords.y,
 			'scale' : scale,
@@ -368,59 +508,64 @@ useful.Gestures.prototype.Single = function (parent) {
 			'source' : event.target || event.srcElement
 		});
 	};
-	// touch events
+
+	// TOUCH EVENTS
+
 	this.onStartTouch = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
-			// get event object
+			// get event elementect
 			event = event || window.event;
 			// handle the event
-			context.startTouch(event);
-			context.changeTouch(event);
+			_this.startTouch(event);
+			_this.changeTouch(event);
 		};
 	};
+
 	this.onChangeTouch = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
-			// get event object
+			// get event elementect
 			event = event || window.event;
 			// optionally cancel the default behaviour
-			context.cancelTouch(event);
+			_this.cancelTouch(event);
 			// handle the event
-			context.changeTouch(event);
+			_this.changeTouch(event);
 		};
 	};
+
 	this.onEndTouch = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
-			// get event object
+			// get event elementect
 			event = event || window.event;
 			// handle the event
-			context.endTouch(event);
+			_this.endTouch(event);
 		};
 	};
-	// mouse wheel events
+
+	// MOUSE EVENTS
+
 	this.onChangeWheel = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
-			// get event object
+			// get event elementect
 			event = event || window.event;
 			// optionally cancel the default behaviour
-			context.cancelTouch(event);
+			_this.cancelTouch(event);
 			// handle the event
-			context.changeWheel(event);
+			_this.changeWheel(event);
 		};
 	};
-	// go
-	this.start();
+
 };
 
 // return as a require.js module
@@ -441,85 +586,32 @@ var useful = useful || {};
 useful.Gestures = useful.Gestures || function () {};
 
 // extend the constructor
-useful.Gestures.prototype.init = function (cfg) {
+useful.Gestures.prototype.init = function (config) {
 	// properties
 	"use strict";
-	this.cfg = cfg;
-	this.obj = cfg.element;
-	this.paused = false;
 	// methods
-	this.start = function () {
-		// check the configuration properties
-		this.checkConfig(this.cfg);
-		// add the single touch events
-		this.single = new this.Single(this);
-		// add the multi touch events
-		this.multi = new this.Multi(this);
-		// disable the start function so it can't be started twice
-		this.init = function () {};
+	this.only = function (config) {
+		// start an instance of the script
+		return new this.Main(config, this).init();
 	};
-	this.checkConfig = function (config) {
-		// add default values for missing ones
-		config.threshold = config.threshold || 50;
-		config.increment = config.increment || 0.1;
-		// cancel all events by default
-		if (config.cancelTouch === undefined || config.cancelTouch === null) { config.cancelTouch = true; }
-		if (config.cancelGesture === undefined || config.cancelGesture === null) { config.cancelGesture = true; }
-		// add dummy event handlers for missing ones
-		config.swipeUp = config.swipeUp || function () {};
-		config.swipeLeft = config.swipeLeft || function () {};
-		config.swipeRight = config.swipeRight || function () {};
-		config.swipeDown = config.swipeDown || function () {};
-		config.drag = config.drag || function () {};
-		config.pinch = config.pinch || function () {};
-		config.twist = config.twist || function () {};
-		config.doubleTap = config.doubleTap || function () {};
-	};
-	this.readEvent = function (event) {
-		var coords = {}, offsets;
-		// try all likely methods of storing coordinates in an event
-		if (event.touches && event.touches[0]) {
-			coords.x = event.touches[0].pageX;
-			coords.y = event.touches[0].pageY;
-		} else if (event.pageX !== undefined) {
-			coords.x = event.pageX;
-			coords.y = event.pageY;
-		} else {
-			coords.x = event.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft);
-			coords.y = event.clientY + (document.documentElement.scrollTop || document.body.scrollTop);
+	this.each = function (config) {
+		var _config, _context = this, instances = [];
+		// for all element
+		for (var a = 0, b = config.elements.length; a < b; a += 1) {
+			// clone the configuration
+			_config = Object.create(config);
+			// insert the current element
+			_config.element = config.elements[a];
+			// delete the list of elements from the clone
+			delete _config.elements;
+			// start a new instance of the object
+			instances[a] = new this.Main(_config, _context).init();
 		}
-		return coords;
+		// return the instances
+		return instances;
 	};
-	this.correctOffset = function (element) {
-		var offsetX = 0, offsetY = 0;
-		// if there is an offset
-		if (element.offsetParent) {
-			// follow the offsets back to the right parent element
-			while (element !== this.obj) {
-				offsetX += element.offsetLeft;
-				offsetY += element.offsetTop;
-				element = element.offsetParent;
-			}
-		}
-		// return the offsets
-		return { 'x' : offsetX, 'y' : offsetY };
-	};
-	// external API
-	this.enableDefaultTouch = function () {
-		this.cfg.cancelTouch = false;
-	};
-	this.disableDefaultTouch = function () {
-		this.cfg.cancelTouch = true;
-	};
-	this.enableDefaultGesture = function () {
-		this.cfg.cancelGesture = false;
-	};
-	this.disableDefaultGesture = function () {
-		this.cfg.cancelGesture = true;
-	};
-	// go
-	this.start();
-	return this;
+	// return a single or multiple instances of the script
+	return (config.elements) ? this.each(config) : this.only(config);
 };
 
 // return as a require.js module
@@ -979,15 +1071,18 @@ useful.Cropper.prototype.Busy = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// methods
-	this.build = function () {
-		var cfg = this.parent.cfg;
+	this.init = function () {
+		var config = this.config;
 		// add a busy message
 		this.spinner = document.createElement('span');
 		this.spinner.className = 'cr-busy';
 		this.spinner.innerHTML = 'Please wait...';
 		this.spinner.style.visibility = 'hidden';
-		cfg.element.appendChild(this.spinner);
+		config.element.appendChild(this.spinner);
+		// return the object
+		return this;
 	};
 	this.show = function () {
 		// show the busy message
@@ -997,8 +1092,6 @@ useful.Cropper.prototype.Busy = function (parent) {
 		// show the busy message
 		this.spinner.style.visibility = 'hidden';
 	};
-	// build the busy message
-	this.build();
 };
 
 // return as a require.js module
@@ -1023,82 +1116,82 @@ useful.Cropper.prototype.Handles = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
-	this.root = parent.parent;
+	this.config = parent.config;
 	// methods
-	this.build = function () {
-		var cfg = this.root.cfg;
+	this.init = function () {
+		var config = this.config;
 		var a, b, name;
 		// create the handles
-		cfg.handles = {};
-		for (a = 0, b = cfg.names.length; a < b; a += 1) {
-			name = cfg.names[a];
-			cfg.handles[name] = document.createElement('span');
-			cfg.handles[name].className = 'cr-' + name;
-			cfg.overlay.appendChild(cfg.handles[name]);
+		config.handles = {};
+		for (a = 0, b = config.names.length; a < b; a += 1) {
+			name = config.names[a];
+			config.handles[name] = document.createElement('span');
+			config.handles[name].className = 'cr-' + name;
+			config.overlay.appendChild(config.handles[name]);
 		}
+		// return the object
+		return this;
 	};
 	this.left = function (distance) {
-		var cfg = this.root.cfg;
+		var config = this.config;
 		var horizontal, left, right, limit;
 		// measure the movement in fractions of the dimensions
-		horizontal = distance / cfg.width;
+		horizontal = distance / config.width;
 		// calculate the new crop fractions
-		left = cfg.left + horizontal;
-		right = cfg.right + horizontal;
-		limit = cfg.right - cfg.minimum;
+		left = config.left + horizontal;
+		right = config.right + horizontal;
+		limit = config.right - config.minimum;
 		// if all are within limits
 		if (left >= 0 && left < limit) {
 			// apply the movement to the crop fractions
-			cfg.left = left;
+			config.left = left;
 		}
 	};
 	this.top = function (distance) {
-		var cfg = this.root.cfg;
+		var config = this.config;
 		var vertical, top, bottom, limit;
 		// measure the movement in fractions of the dimensions
-		vertical = distance / cfg.height;
+		vertical = distance / config.height;
 		// calculate the new crop fractions
-		top = cfg.top + vertical;
-		bottom = cfg.bottom + vertical;
-		limit = cfg.bottom - cfg.minimum;
+		top = config.top + vertical;
+		bottom = config.bottom + vertical;
+		limit = config.bottom - config.minimum;
 		// if all are within limits
 		if (top >= 0 && top < limit) {
 			// apply the movement to the crop fractions
-			cfg.top = top;
+			config.top = top;
 		}
 	};
 	this.right = function (distance) {
-		var cfg = this.root.cfg;
+		var config = this.config;
 		var horizontal, left, right, limit;
 		// measure the movement in fractions of the dimensions
-		horizontal = distance / cfg.width;
+		horizontal = distance / config.width;
 		// calculate the new crop fractions
-		left = cfg.left + horizontal;
-		right = cfg.right + horizontal;
-		limit = cfg.left + cfg.minimum;
+		left = config.left + horizontal;
+		right = config.right + horizontal;
+		limit = config.left + config.minimum;
 		// if all are within limits
 		if (right <= 1 && right > limit) {
 			// apply the movement to the crop fractions
-			cfg.right = right;
+			config.right = right;
 		}
 	};
 	this.bottom = function (distance) {
-		var cfg = this.root.cfg;
+		var config = this.config;
 		var vertical, top, bottom, limit;
 		// measure the movement in fractions of the dimensions
-		vertical = distance / cfg.height;
+		vertical = distance / config.height;
 		// calculate the new crop fractions
-		top = cfg.top + vertical;
-		bottom = cfg.bottom + vertical;
-		limit = cfg.top + cfg.minimum;
+		top = config.top + vertical;
+		bottom = config.bottom + vertical;
+		limit = config.top + config.minimum;
 		// if all are within limits
 		if (bottom <= 1 && bottom > limit) {
 			// apply the movement to the crop fractions
-			cfg.bottom = bottom;
+			config.bottom = bottom;
 		}
 	};
-	// build the handles
-	this.build();
 };
 
 // return as a require.js module
@@ -1123,21 +1216,23 @@ useful.Cropper.prototype.Indicator = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
+	this.context = parent.context;
 	// methods
-	this.build = function () {
-		var cfg = this.parent.cfg;
+	this.init = function () {
+		var config = this.config;
 		// create the indicator
-		cfg.overlay = document.createElement('span');
-		cfg.overlay.className = 'cr-overlay';
-		cfg.overlay.style.background = 'url(' + cfg.image.src + ')';
+		config.overlay = document.createElement('span');
+		config.overlay.className = 'cr-overlay';
+		config.overlay.style.background = 'url(' + config.image.src + ')';
 		// create the handles
-		this.handles = new this.parent.Handles(this);
+		this.handles = new this.context.Handles(this).init();
 		// add the indicator to the parent
-		cfg.element.appendChild(cfg.overlay);
+		config.element.appendChild(config.overlay);
 		// add the interaction
-		var context = this;
+		var _this = this;
 		var gestures = new useful.Gestures().init({
-			'element' : cfg.overlay.parentNode,
+			'element' : config.overlay.parentNode,
 			'threshold' : 50,
 			'increment' : 0.1,
 			'cancelTouch' : true,
@@ -1146,89 +1241,89 @@ useful.Cropper.prototype.Indicator = function (parent) {
 				// move the handles
 				switch (metrics.source.className) {
 					case 'cr-tl' :
-						context.handles.left(metrics.horizontal);
-						context.handles.top(metrics.vertical);
-						context.parent.update(null, true, 'tl');
+						_this.handles.left(metrics.horizontal);
+						_this.handles.top(metrics.vertical);
+						_this.parent.update(null, true, 'tl');
 						break;
 					case 'cr-tc' :
-						context.handles.top(metrics.vertical);
-						context.parent.update(null, true, 'tc');
+						_this.handles.top(metrics.vertical);
+						_this.parent.update(null, true, 'tc');
 						break;
 					case 'cr-tr' :
-						context.handles.right(metrics.horizontal);
-						context.handles.top(metrics.vertical);
-						context.parent.update(null, true, 'tr');
+						_this.handles.right(metrics.horizontal);
+						_this.handles.top(metrics.vertical);
+						_this.parent.update(null, true, 'tr');
 						break;
 					case 'cr-ml' :
-						context.handles.left(metrics.horizontal);
-						context.parent.update(null, true, 'ml');
+						_this.handles.left(metrics.horizontal);
+						_this.parent.update(null, true, 'ml');
 						break;
 					case 'cr-mr' :
-						context.handles.right(metrics.horizontal);
-						context.parent.update(null, true, 'mr');
+						_this.handles.right(metrics.horizontal);
+						_this.parent.update(null, true, 'mr');
 						break;
 					case 'cr-bl' :
-						context.handles.left(metrics.horizontal);
-						context.handles.bottom(metrics.vertical);
-						context.parent.update(null, true, 'bl');
+						_this.handles.left(metrics.horizontal);
+						_this.handles.bottom(metrics.vertical);
+						_this.parent.update(null, true, 'bl');
 						break;
 					case 'cr-bc' :
-						context.handles.bottom(metrics.vertical);
-						context.parent.update(null, true, 'bc');
+						_this.handles.bottom(metrics.vertical);
+						_this.parent.update(null, true, 'bc');
 						break;
 					case 'cr-br' :
-						context.handles.right(metrics.horizontal);
-						context.handles.bottom(metrics.vertical);
-						context.parent.update(null, true, 'br');
+						_this.handles.right(metrics.horizontal);
+						_this.handles.bottom(metrics.vertical);
+						_this.parent.update(null, true, 'br');
 						break;
 					default :
-						context.move(metrics.horizontal, metrics.vertical);
-						context.parent.update(null, true, null);
+						_this.move(metrics.horizontal, metrics.vertical);
+						_this.parent.update(null, true, null);
 				}
 			}
 		});
+		// return the object
+		return this;
 	};
 	this.update = function () {
-		var cfg = this.parent.cfg;
+		var config = this.config;
 		var left, top, right, bottom;
 		// get the dimensions of the component
-		cfg.width = cfg.image.offsetWidth;
-		cfg.height = cfg.image.offsetHeight;
+		config.width = config.image.offsetWidth;
+		config.height = config.image.offsetHeight;
 		// convert the crop fractions into pixel values
-		left = cfg.left * cfg.width;
-		top = cfg.top * cfg.height;
-		right = cfg.width - cfg.right * cfg.width;
-		bottom = cfg.height - cfg.bottom * cfg.height;
+		left = config.left * config.width;
+		top = config.top * config.height;
+		right = config.width - config.right * config.width;
+		bottom = config.height - config.bottom * config.height;
 		// reposition the indicator
-		cfg.overlay.style.left = left + 'px';
-		cfg.overlay.style.top = top + 'px';
-		cfg.overlay.style.right = right + 'px';
-		cfg.overlay.style.bottom = bottom + 'px';
+		config.overlay.style.left = left + 'px';
+		config.overlay.style.top = top + 'px';
+		config.overlay.style.right = right + 'px';
+		config.overlay.style.bottom = bottom + 'px';
 		// reposition the background image
-		cfg.overlay.style.backgroundPosition = '-' + left + 'px -' + top + 'px';
+		config.overlay.style.backgroundPosition = '-' + left + 'px -' + top + 'px';
 	};
 	this.move = function (x, y) {
-		var cfg = this.parent.cfg;
+		var config = this.config;
 		var horizontal, vertical, left, top, right, bottom;
 		// measure the movement in fractions of the dimensions
-		horizontal = x / cfg.width;
-		vertical = y / cfg.height;
+		horizontal = x / config.width;
+		vertical = y / config.height;
 		// calculate the new crop fractions
-		left = cfg.left + horizontal;
-		top = cfg.top + vertical;
-		right = cfg.right + horizontal;
-		bottom = cfg.bottom + vertical;
+		left = config.left + horizontal;
+		top = config.top + vertical;
+		right = config.right + horizontal;
+		bottom = config.bottom + vertical;
 		// if all are within limits
 		if (left >= 0 && top >= 0 && right <= 1 && bottom <= 1 && left < right && top < bottom) {
 			// apply the movement to the crop fractions
-			cfg.left = left;
-			cfg.top = top;
-			cfg.right = right;
-			cfg.bottom = bottom;
+			config.left = left;
+			config.top = top;
+			config.right = right;
+			config.bottom = bottom;
 		}
 	};
-	// build the indicator
-	this.build();
 };
 
 // return as a require.js module
@@ -1249,124 +1344,182 @@ var useful = useful || {};
 useful.Cropper = useful.Cropper || function () {};
 
 // extend the constructor
-useful.Cropper.prototype.Toolbar = function (parent) {
+useful.Cropper.prototype.Main = function (config, context) {
 	// properties
 	"use strict";
-	this.parent = parent;
-	this.ui = {};
+	this.config = config;
+	this.context = context;
+	this.config.names = ['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'];
+	this.config.image = config.element.getElementsByTagName('img')[0];
+	this.config.output = config.element.getElementsByTagName('input');
+	this.config.values = null;
+	this.config.onchange = config.onchange || function () {};
+	this.config.delay = config.delay || 1000;
+	this.config.timeout = null;
+	this.config.realtime = config.realtime || false;
+	this.config.minimum = config.minimum || 0.2;
+	this.config.crop = config.crop || [0.1, 0.1, 0.9, 0.9];
+	this.config.url = config.image.src;
+	this.config.offset = config.offset || 4;
+	this.config.reset = [config.left, config.top, config.right, config.bottom];
+	// components
+	this.busy = new this.context.Busy(this).init();
+	this.indicator = new this.context.Indicator(this).init();
+	this.toolbar = new this.context.Toolbar(this).init();
 	// methods
-	this.build = function () {
-		var cfg = this.parent.cfg;
-		var context = this;
-		// create the toolbar
-		cfg.toolbar = document.createElement('figcaption');
-		// create the apply button
-		cfg.applyButton = document.createElement('button');
-		cfg.applyButton.setAttribute('type', 'button');
-		cfg.applyButton.className = 'cr-apply button';
-		cfg.applyButton.innerHTML = 'Apply';
-		cfg.toolbar.appendChild(cfg.applyButton);
-		cfg.applyButton.onclick = function () {
-			context.apply();
-		};
-		// create the reset button
-		cfg.resetButton = document.createElement('button');
-		cfg.resetButton.setAttribute('type', 'button');
-		cfg.resetButton.className = 'cr-reset button';
-		cfg.resetButton.innerHTML = 'Reset';
-		cfg.toolbar.appendChild(cfg.resetButton);
-		cfg.resetButton.onclick = function () {
-			context.reset();
-		};
-		// add the toolbar
-		cfg.element.appendChild(cfg.toolbar);
-	};
-	this.apply = function () {
-		var cfg = this.parent.cfg;
-		var src, width, height, aspect;
-		var context = this;
-		// normalise the dimensions
-		width = cfg.overlay.offsetWidth;
-		height = cfg.overlay.offsetHeight;
-		aspect = cfg.element.offsetHeight / cfg.element.offsetWidth;
-		if (height / width < aspect) {
-			height = cfg.image.offsetWidth / width * cfg.overlay.offsetHeight;
-			width = cfg.image.offsetWidth;
+	this.init = function () {
+		var config = this.config;
+		// if the image has loaded
+		if (config.image.offsetWidth > 0 && config.image.offsetHeight > 0) {
+			// update the indicator
+			this.update();
+			this.preset();
+		// else
 		} else {
-			width = cfg.image.offsetHeight / height * cfg.overlay.offsetWidth;
-			height = cfg.image.offsetHeight;
+			// wait for the image to load
+			var _this = this;
+			config.image.onload = function () {
+				// update the indicator
+				_this.update();
+				_this.preset();
+			};
 		}
-		// fix the container
-		cfg.element.style.width = cfg.image.offsetWidth + 'px';
-		cfg.element.style.height = cfg.image.offsetHeight + 'px';
-		// show busy message
-		this.parent.busy.show();
-		// upon loading
-		cfg.image.onload = function () {
-			// set the image to center
-			cfg.image.style.marginTop = Math.round((cfg.element.offsetHeight - cfg.image.offsetHeight - cfg.offset) / 2) + 'px';
-			// hide the busy message
-			context.parent.busy.hide();
-		};
-		// round the numbers
-		width = Math.round(width);
-		height = Math.round(height);
-		// replace the image with a cropped version
-		src = cfg.image.src;
-		src = useful.urls.replace(src, 'width', width);
-		src = useful.urls.replace(src, 'height', height);
-		src = useful.urls.replace(src, 'left', cfg.left);
-		src = useful.urls.replace(src, 'top', cfg.top);
-		src = useful.urls.replace(src, 'right', cfg.right);
-		src = useful.urls.replace(src, 'bottom', cfg.bottom);
-		src = useful.urls.replace(src, 'time', new Date().getTime());
-		cfg.image.src = src;
-		// disable the indicator
-		cfg.applyButton.disabled = true;
-		cfg.element.className = cfg.element.className.replace(' cr-disabled', '') + ' cr-disabled';
-		// trigger any external onchange event
-		cfg.onchange(cfg.values);
-		// cancel the click
-		return false;
+		// return the object
+		return this;
 	};
-	this.reset = function () {
-		var cfg = this.parent.cfg;
-		var context = this;
-		// show busy message
-		this.parent.busy.show();
-		// upon loading
-		cfg.image.onload = function () {
-			// undo the margin
-			cfg.image.style.marginTop = 0;
-			// undo the values
-			cfg.left = cfg.reset[0];
-			cfg.top = cfg.reset[1];
-			cfg.right = cfg.reset[2];
-			cfg.bottom = cfg.reset[3];
-			// reset the indicator
-			context.parent.update();
-			// enable the indicator
-			cfg.applyButton.disabled = false;
-			cfg.element.className = cfg.element.className.replace(' cr-disabled', '');
-			// hide the busy message
-			context.parent.busy.hide();
-		};
-		// replace the image with an uncropped version
-		cfg.url = useful.urls.replace(cfg.url, 'name', new Date().getTime());
-		cfg.image.src =  cfg.url;
-		cfg.overlay.style.backgroundImage = 'url(' + cfg.url + ')';
-		// trigger any external onchange event
-		cfg.onchange(cfg.values);
-		// cancel the click
-		return false;
+	this.preset = function () {
+		var query, width, height, aspect, config = this.config;
+		// if there's anything to measure yet
+		if (config.image.offsetWidth) {
+			// retrieve the crop coordinates from the url
+			query = useful.urls.load(config.url);
+			// if we started out with a cropped image
+			if (query.left > 0 || query.top > 0 || query.right < 1 || query.bottom < 1) {
+				// validate the input
+				query.left = query.left || 0;
+				query.top = query.top || 0;
+				query.right = query.right || 1;
+				query.bottom = query.bottom || 1;
+				// store the cropping dimensions
+				config.left = query.left;
+				config.top = query.top;
+				config.right = query.right;
+				config.bottom = query.bottom;
+				// guess what the original dimensions could have been
+				width = config.image.offsetWidth / (config.right - config.left);
+				height = config.image.offsetHeight / (config.bottom - config.top);
+				aspect = height / width;
+				// scale to the available space
+				width = config.element.offsetWidth;
+				height = Math.round(width * aspect);
+				// limit the image's size to the original parent
+				config.image.style.maxWidth = width + 'px';
+				config.image.style.maxHeight = height + 'px';
+				// guess what the reset url of the uncropped image might have been
+				config.url = useful.urls.replace(config.url, 'width', width);
+				config.url = useful.urls.replace(config.url, 'height', height);
+				config.url = useful.urls.replace(config.url, 'left', 0);
+				config.url = useful.urls.replace(config.url, 'top', 0);
+				config.url = useful.urls.replace(config.url, 'right', 1);
+				config.url = useful.urls.replace(config.url, 'bottom', 1);
+				// restore the container's original size
+				config.element.style.width = width + 'px';
+				config.element.style.height = height + 'px';
+				// if continuous updates are on
+				if (config.realtime) {
+					// load the original image
+					var _this = this;
+					config.image.onload = function () { _this.update(); };
+					config.image.src = config.url;
+					config.overlay.style.background = 'url(' + config.url + ')';
+				} else {
+					// set the image to center
+					config.image.style.marginTop = Math.round((config.element.offsetHeight - config.image.offsetHeight - config.offset) / 2) + 'px';
+					// disable the indicator
+					config.applyButton.disabled = true;
+					config.element.className = config.element.className.replace(' cr-disabled', '') + ' cr-disabled';
+				}
+			}
+		}
 	};
-	// build the toolbar
-	if (!this.parent.cfg.realtime) { this.build(); }
+	this.correct = function (handle) {
+		var config = this.config;
+		// determine the dominant motion
+		var dLeft = Math.abs(config.values.left - config.left),
+			dTop = Math.abs(config.values.top - config.top),
+			dRight = Math.abs(config.values.right - config.right),
+			dBottom = Math.abs(config.values.bottom - config.bottom),
+			aspect = config.aspect;
+		// implement the aspect ratio from the required corner
+		switch (handle) {
+			case 'tl' :
+				if (dLeft > dTop) { config.top = config.bottom - (config.right - config.left) * aspect; }
+				else { config.left = config.right - (config.bottom - config.top) / aspect; }
+				break;
+			case 'tc' :
+				config.right = config.left + (config.bottom - config.top) / aspect;
+				break;
+			case 'tr' :
+				if (dRight > dTop) { config.top = config.bottom - (config.right - config.left) * aspect; }
+				else { config.right = config.left + (config.bottom - config.top) / aspect;  }
+				break;
+			case 'ml' :
+				config.bottom = config.top + (config.right - config.left) * aspect;
+				break;
+			case 'mr' :
+				config.bottom = config.top + (config.right - config.left) * aspect;
+				break;
+			case 'bl' :
+				if (dLeft > dBottom) { config.bottom = config.top + (config.right - config.left) * aspect; }
+				else { config.left = config.right - (config.bottom - config.top) / aspect; }
+				break;
+			case 'bc' :
+				config.right = config.left + (config.bottom - config.top) / aspect;
+				break;
+			case 'br' :
+				if (dRight > dBottom) { config.bottom = config.top + (config.right - config.left) * aspect; }
+				else { config.right = config.left + (config.bottom - config.top) / aspect; }
+				break;
+		}
+	};
+	this.update = function (values, changed, handle) {
+		var config = this.config;
+		changed = (changed === true);
+		// process any override values
+		if (values && values.left) { config.left = values.left; }
+		if (values && values.top) { config.top = values.top; }
+		if (values && values.right) { config.right = values.right; }
+		if (values && values.bottom) { config.bottom = values.bottom; }
+		// correct the values for aspect ratio
+		if (config.aspect && config.values && handle) { this.correct(handle); }
+		// refresh the hidden fields
+		config.output[0].value = config.left;
+		config.output[1].value = config.top;
+		config.output[2].value = config.right;
+		config.output[3].value = config.bottom;
+		// refresh the json object of values
+		config.values = {
+			'left' : config.left,
+			'top' : config.top,
+			'right' : config.right,
+			'bottom' : config.bottom
+		};
+		// redraw the indicator
+		this.indicator.update(this);
+		// update the onchange event periodically
+		if (changed && config.realtime) {
+			clearTimeout(config.timeout);
+			var _this = this;
+			config.timeout = setTimeout(function () {
+				_this.config.onchange(_this.config.values);
+			}, config.delay);
+		}
+	};
 };
 
 // return as a require.js module
 if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Cropper.Toolbar;
+	exports = module.exports = useful.Cropper.Main;
 }
 
 /*
@@ -1382,178 +1535,173 @@ var useful = useful || {};
 useful.Cropper = useful.Cropper || function () {};
 
 // extend the constructor
-useful.Cropper.prototype.init = function (cfg) {
+useful.Cropper.prototype.Toolbar = function (parent) {
 	// properties
 	"use strict";
-	this.cfg = cfg;
-	this.cfg.names = ['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'];
-	this.cfg.image = cfg.element.getElementsByTagName('img')[0];
-	this.cfg.output = cfg.element.getElementsByTagName('input');
-	this.cfg.values = null;
-	this.cfg.onchange = cfg.onchange || function () {};
-	this.cfg.delay = cfg.delay || 1000;
-	this.cfg.timeout = null;
-	this.cfg.realtime = cfg.realtime || false;
-	this.cfg.minimum = cfg.minimum || 0.2;
-	this.cfg.crop = cfg.crop || [0.1, 0.1, 0.9, 0.9];
-	this.cfg.url = cfg.image.src;
-	this.cfg.offset = cfg.offset || 4;
-	this.cfg.reset = [cfg.left, cfg.top, cfg.right, cfg.bottom];
-	// components
-	this.busy = new this.Busy(this);
-	this.indicator = new this.Indicator(this);
-	this.toolbar = new this.Toolbar(this);
+	this.parent = parent;
+	this.config = parent.config;
+	this.ui = {};
 	// methods
-	this.watch = function () {
-		var cfg = this.cfg;
-		// if the image has loaded
-		if (cfg.image.offsetWidth > 0 && cfg.image.offsetHeight > 0) {
-			// update the indicator
-			this.update();
-			this.preset();
-		// else
-		} else {
-			// wait for the image to load
-			var context = this;
-			cfg.image.onload = function () {
-				// update the indicator
-				context.update();
-				context.preset();
-			};
-		}
+	this.init = function () {
+		// build the toolbar
+		if (!this.config.realtime) { this.build(); }
+		// return the object
+		return this;
 	};
-	this.preset = function () {
-		var query, width, height, aspect, cfg = this.cfg;
-		// if there's anything to measure yet
-		if (cfg.image.offsetWidth) {
-			// retrieve the crop coordinates from the url
-			query = useful.urls.load(cfg.url);
-			// if we started out with a cropped image
-			if (query.left > 0 || query.top > 0 || query.right < 1 || query.bottom < 1) {
-				// validate the input
-				query.left = query.left || 0;
-				query.top = query.top || 0;
-				query.right = query.right || 1;
-				query.bottom = query.bottom || 1;
-				// store the cropping dimensions
-				cfg.left = query.left;
-				cfg.top = query.top;
-				cfg.right = query.right;
-				cfg.bottom = query.bottom;
-				// guess what the original dimensions could have been
-				width = cfg.image.offsetWidth / (cfg.right - cfg.left);
-				height = cfg.image.offsetHeight / (cfg.bottom - cfg.top);
-				aspect = height / width;
-				// scale to the available space
-				width = cfg.element.offsetWidth;
-				height = Math.round(width * aspect);
-				// limit the image's size to the original parent
-				cfg.image.style.maxWidth = width + 'px';
-				cfg.image.style.maxHeight = height + 'px';
-				// guess what the reset url of the uncropped image might have been
-				cfg.url = useful.urls.replace(cfg.url, 'width', width);
-				cfg.url = useful.urls.replace(cfg.url, 'height', height);
-				cfg.url = useful.urls.replace(cfg.url, 'left', 0);
-				cfg.url = useful.urls.replace(cfg.url, 'top', 0);
-				cfg.url = useful.urls.replace(cfg.url, 'right', 1);
-				cfg.url = useful.urls.replace(cfg.url, 'bottom', 1);
-				// restore the container's original size
-				cfg.element.style.width = width + 'px';
-				cfg.element.style.height = height + 'px';
-				// if continuous updates are on
-				if (cfg.realtime) {
-					// load the original image
-					var context = this;
-					cfg.image.onload = function () { context.update(); };
-					cfg.image.src = cfg.url;
-					cfg.overlay.style.background = 'url(' + cfg.url + ')';
-				} else {
-					// set the image to center
-					cfg.image.style.marginTop = Math.round((cfg.element.offsetHeight - cfg.image.offsetHeight - cfg.offset) / 2) + 'px';
-					// disable the indicator
-					cfg.applyButton.disabled = true;
-					cfg.element.className = cfg.element.className.replace(' cr-disabled', '') + ' cr-disabled';
-				}
-			}
-		}
-	};
-	this.correct = function (handle) {
-		var cfg = this.cfg;
-		// determine the dominant motion
-		var dLeft = Math.abs(cfg.values.left - cfg.left),
-			dTop = Math.abs(cfg.values.top - cfg.top),
-			dRight = Math.abs(cfg.values.right - cfg.right),
-			dBottom = Math.abs(cfg.values.bottom - cfg.bottom),
-			aspect = cfg.aspect;
-		// implement the aspect ratio from the required corner
-		switch (handle) {
-			case 'tl' :
-				if (dLeft > dTop) { cfg.top = cfg.bottom - (cfg.right - cfg.left) * aspect; }
-				else { cfg.left = cfg.right - (cfg.bottom - cfg.top) / aspect; }
-				break;
-			case 'tc' :
-				cfg.right = cfg.left + (cfg.bottom - cfg.top) / aspect;
-				break;
-			case 'tr' :
-				if (dRight > dTop) { cfg.top = cfg.bottom - (cfg.right - cfg.left) * aspect; }
-				else { cfg.right = cfg.left + (cfg.bottom - cfg.top) / aspect;  }
-				break;
-			case 'ml' :
-				cfg.bottom = cfg.top + (cfg.right - cfg.left) * aspect;
-				break;
-			case 'mr' :
-				cfg.bottom = cfg.top + (cfg.right - cfg.left) * aspect;
-				break;
-			case 'bl' :
-				if (dLeft > dBottom) { cfg.bottom = cfg.top + (cfg.right - cfg.left) * aspect; }
-				else { cfg.left = cfg.right - (cfg.bottom - cfg.top) / aspect; }
-				break;
-			case 'bc' :
-				cfg.right = cfg.left + (cfg.bottom - cfg.top) / aspect;
-				break;
-			case 'br' :
-				if (dRight > dBottom) { cfg.bottom = cfg.top + (cfg.right - cfg.left) * aspect; }
-				else { cfg.right = cfg.left + (cfg.bottom - cfg.top) / aspect; }
-				break;
-		}
-	};
-	this.update = function (values, changed, handle) {
-		var cfg = this.cfg;
-		changed = (changed === true);
-		// process any override values
-		if (values && values.left) { cfg.left = values.left; }
-		if (values && values.top) { cfg.top = values.top; }
-		if (values && values.right) { cfg.right = values.right; }
-		if (values && values.bottom) { cfg.bottom = values.bottom; }
-		// correct the values for aspect ratio
-		if (cfg.aspect && cfg.values && handle) { this.correct(handle); }
-		// refresh the hidden fields
-		cfg.output[0].value = cfg.left;
-		cfg.output[1].value = cfg.top;
-		cfg.output[2].value = cfg.right;
-		cfg.output[3].value = cfg.bottom;
-		// refresh the json object of values
-		cfg.values = {
-			'left' : cfg.left,
-			'top' : cfg.top,
-			'right' : cfg.right,
-			'bottom' : cfg.bottom
+	this.build = function () {
+		var config = this.config;
+		var _this = this;
+		// create the toolbar
+		config.toolbar = document.createElement('figcaption');
+		// create the apply button
+		config.applyButton = document.createElement('button');
+		config.applyButton.setAttribute('type', 'button');
+		config.applyButton.className = 'cr-apply button';
+		config.applyButton.innerHTML = 'Apply';
+		config.toolbar.appendChild(config.applyButton);
+		config.applyButton.onclick = function () {
+			_this.apply();
 		};
-		// redraw the indicator
-		this.indicator.update(this);
-		// update the onchange event periodically
-		if (changed && cfg.realtime) {
-			clearTimeout(cfg.timeout);
-			var context = this;
-			cfg.timeout = setTimeout(function () {
-				context.cfg.onchange(context.cfg.values);
-			}, cfg.delay);
-		}
+		// create the reset button
+		config.resetButton = document.createElement('button');
+		config.resetButton.setAttribute('type', 'button');
+		config.resetButton.className = 'cr-reset button';
+		config.resetButton.innerHTML = 'Reset';
+		config.toolbar.appendChild(config.resetButton);
+		config.resetButton.onclick = function () {
+			_this.reset();
+		};
+		// add the toolbar
+		config.element.appendChild(config.toolbar);
 	};
-	// startup
-	this.watch();
-	this.init = function () {};
-	return this;
+	this.apply = function () {
+		var config = this.config;
+		// if the apply button is enabled
+		if (!config.applyButton.disabled) {
+			var src, width, height, aspect;
+			var _this = this;
+			// normalise the dimensions
+			width = config.overlay.offsetWidth;
+			height = config.overlay.offsetHeight;
+			aspect = config.element.offsetHeight / config.element.offsetWidth;
+			if (height / width < aspect) {
+				height = config.image.offsetWidth / width * config.overlay.offsetHeight;
+				width = config.image.offsetWidth;
+			} else {
+				width = config.image.offsetHeight / height * config.overlay.offsetWidth;
+				height = config.image.offsetHeight;
+			}
+			// fix the container
+			config.element.style.width = config.image.offsetWidth + 'px';
+			config.element.style.height = config.image.offsetHeight + 'px';
+			// show busy message
+			this.parent.busy.show();
+			// upon loading
+			config.image.onload = function () {
+				// set the image to center
+				config.image.style.marginTop = Math.round((config.element.offsetHeight - config.image.offsetHeight - config.offset) / 2) + 'px';
+				// hide the busy message
+				_this.parent.busy.hide();
+			};
+			// round the numbers
+			width = Math.round(width);
+			height = Math.round(height);
+			// replace the image with a cropped version
+			src = config.image.src;
+			src = useful.urls.replace(src, 'width', width);
+			src = useful.urls.replace(src, 'height', height);
+			src = useful.urls.replace(src, 'left', config.left);
+			src = useful.urls.replace(src, 'top', config.top);
+			src = useful.urls.replace(src, 'right', config.right);
+			src = useful.urls.replace(src, 'bottom', config.bottom);
+			src = useful.urls.replace(src, 'time', new Date().getTime());
+			config.image.src = src;
+			// disable the indicator
+			config.applyButton.disabled = true;
+			config.element.className = config.element.className.replace(' cr-disabled', '') + ' cr-disabled';
+			// trigger any external onchange event
+			config.onchange(config.values);
+		}
+		// cancel the click
+		return false;
+	};
+	this.reset = function () {
+		var config = this.config;
+		var _this = this;
+		// show busy message
+		this.parent.busy.show();
+		// upon loading
+		config.image.onload = function () {
+			// undo the margin
+			config.image.style.marginTop = 0;
+			// undo the values
+			config.left = config.reset[0];
+			config.top = config.reset[1];
+			config.right = config.reset[2];
+			config.bottom = config.reset[3];
+			// reset the indicator
+			_this.parent.update();
+			// enable the indicator
+			config.applyButton.disabled = false;
+			config.element.className = config.element.className.replace(' cr-disabled', '');
+			// hide the busy message
+			_this.parent.busy.hide();
+		};
+		// replace the image with an uncropped version
+		config.url = useful.urls.replace(config.url, 'name', new Date().getTime());
+		config.image.src =  config.url;
+		config.overlay.style.backgroundImage = 'url(' + config.url + ')';
+		// trigger any external onchange event
+		config.onchange(config.values);
+		// cancel the click
+		return false;
+	};
+};
+
+// return as a require.js module
+if (typeof module !== 'undefined') {
+	exports = module.exports = useful.Cropper.Toolbar;
+}
+
+/*
+	Source:
+	van Creij, Maurice (2014). "useful.photowall.js: Simple photo wall", version 20141127, http://www.woollymittens.nl/.
+
+	License:
+	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+*/
+
+// create the constructor if needed
+var useful = useful || {};
+useful.Cropper = useful.Cropper || function () {};
+
+// extend the constructor
+useful.Cropper.prototype.init = function (config) {
+	// properties
+	"use strict";
+	// methods
+	this.only = function (config) {
+		// start an instance of the script
+		return new this.Main(config, this).init();
+	};
+	this.each = function (config) {
+		var _config, _context = this, instances = [];
+		// for all element
+		for (var a = 0, b = config.elements.length; a < b; a += 1) {
+			// clone the configuration
+			_config = Object.create(config);
+			// insert the current element
+			_config.element = config.elements[a];
+			// delete the list of elements from the clone
+			delete _config.elements;
+			// start a new instance of the object
+			instances[a] = new this.Main(_config, _context).init();
+		}
+		// return the instances
+		return instances;
+	};
+	// return a single or multiple instances of the script
+	return (config.elements) ? this.each(config) : this.only(config);
 };
 
 // return as a require.js module

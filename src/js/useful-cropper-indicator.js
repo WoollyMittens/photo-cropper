@@ -15,21 +15,23 @@ useful.Cropper.prototype.Indicator = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
+	this.context = parent.context;
 	// methods
-	this.build = function () {
-		var cfg = this.parent.cfg;
+	this.init = function () {
+		var config = this.config;
 		// create the indicator
-		cfg.overlay = document.createElement('span');
-		cfg.overlay.className = 'cr-overlay';
-		cfg.overlay.style.background = 'url(' + cfg.image.src + ')';
+		config.overlay = document.createElement('span');
+		config.overlay.className = 'cr-overlay';
+		config.overlay.style.background = 'url(' + config.image.src + ')';
 		// create the handles
-		this.handles = new this.parent.Handles(this);
+		this.handles = new this.context.Handles(this).init();
 		// add the indicator to the parent
-		cfg.element.appendChild(cfg.overlay);
+		config.element.appendChild(config.overlay);
 		// add the interaction
-		var context = this;
+		var _this = this;
 		var gestures = new useful.Gestures().init({
-			'element' : cfg.overlay.parentNode,
+			'element' : config.overlay.parentNode,
 			'threshold' : 50,
 			'increment' : 0.1,
 			'cancelTouch' : true,
@@ -38,89 +40,89 @@ useful.Cropper.prototype.Indicator = function (parent) {
 				// move the handles
 				switch (metrics.source.className) {
 					case 'cr-tl' :
-						context.handles.left(metrics.horizontal);
-						context.handles.top(metrics.vertical);
-						context.parent.update(null, true, 'tl');
+						_this.handles.left(metrics.horizontal);
+						_this.handles.top(metrics.vertical);
+						_this.parent.update(null, true, 'tl');
 						break;
 					case 'cr-tc' :
-						context.handles.top(metrics.vertical);
-						context.parent.update(null, true, 'tc');
+						_this.handles.top(metrics.vertical);
+						_this.parent.update(null, true, 'tc');
 						break;
 					case 'cr-tr' :
-						context.handles.right(metrics.horizontal);
-						context.handles.top(metrics.vertical);
-						context.parent.update(null, true, 'tr');
+						_this.handles.right(metrics.horizontal);
+						_this.handles.top(metrics.vertical);
+						_this.parent.update(null, true, 'tr');
 						break;
 					case 'cr-ml' :
-						context.handles.left(metrics.horizontal);
-						context.parent.update(null, true, 'ml');
+						_this.handles.left(metrics.horizontal);
+						_this.parent.update(null, true, 'ml');
 						break;
 					case 'cr-mr' :
-						context.handles.right(metrics.horizontal);
-						context.parent.update(null, true, 'mr');
+						_this.handles.right(metrics.horizontal);
+						_this.parent.update(null, true, 'mr');
 						break;
 					case 'cr-bl' :
-						context.handles.left(metrics.horizontal);
-						context.handles.bottom(metrics.vertical);
-						context.parent.update(null, true, 'bl');
+						_this.handles.left(metrics.horizontal);
+						_this.handles.bottom(metrics.vertical);
+						_this.parent.update(null, true, 'bl');
 						break;
 					case 'cr-bc' :
-						context.handles.bottom(metrics.vertical);
-						context.parent.update(null, true, 'bc');
+						_this.handles.bottom(metrics.vertical);
+						_this.parent.update(null, true, 'bc');
 						break;
 					case 'cr-br' :
-						context.handles.right(metrics.horizontal);
-						context.handles.bottom(metrics.vertical);
-						context.parent.update(null, true, 'br');
+						_this.handles.right(metrics.horizontal);
+						_this.handles.bottom(metrics.vertical);
+						_this.parent.update(null, true, 'br');
 						break;
 					default :
-						context.move(metrics.horizontal, metrics.vertical);
-						context.parent.update(null, true, null);
+						_this.move(metrics.horizontal, metrics.vertical);
+						_this.parent.update(null, true, null);
 				}
 			}
 		});
+		// return the object
+		return this;
 	};
 	this.update = function () {
-		var cfg = this.parent.cfg;
+		var config = this.config;
 		var left, top, right, bottom;
 		// get the dimensions of the component
-		cfg.width = cfg.image.offsetWidth;
-		cfg.height = cfg.image.offsetHeight;
+		config.width = config.image.offsetWidth;
+		config.height = config.image.offsetHeight;
 		// convert the crop fractions into pixel values
-		left = cfg.left * cfg.width;
-		top = cfg.top * cfg.height;
-		right = cfg.width - cfg.right * cfg.width;
-		bottom = cfg.height - cfg.bottom * cfg.height;
+		left = config.left * config.width;
+		top = config.top * config.height;
+		right = config.width - config.right * config.width;
+		bottom = config.height - config.bottom * config.height;
 		// reposition the indicator
-		cfg.overlay.style.left = left + 'px';
-		cfg.overlay.style.top = top + 'px';
-		cfg.overlay.style.right = right + 'px';
-		cfg.overlay.style.bottom = bottom + 'px';
+		config.overlay.style.left = left + 'px';
+		config.overlay.style.top = top + 'px';
+		config.overlay.style.right = right + 'px';
+		config.overlay.style.bottom = bottom + 'px';
 		// reposition the background image
-		cfg.overlay.style.backgroundPosition = '-' + left + 'px -' + top + 'px';
+		config.overlay.style.backgroundPosition = '-' + left + 'px -' + top + 'px';
 	};
 	this.move = function (x, y) {
-		var cfg = this.parent.cfg;
+		var config = this.config;
 		var horizontal, vertical, left, top, right, bottom;
 		// measure the movement in fractions of the dimensions
-		horizontal = x / cfg.width;
-		vertical = y / cfg.height;
+		horizontal = x / config.width;
+		vertical = y / config.height;
 		// calculate the new crop fractions
-		left = cfg.left + horizontal;
-		top = cfg.top + vertical;
-		right = cfg.right + horizontal;
-		bottom = cfg.bottom + vertical;
+		left = config.left + horizontal;
+		top = config.top + vertical;
+		right = config.right + horizontal;
+		bottom = config.bottom + vertical;
 		// if all are within limits
 		if (left >= 0 && top >= 0 && right <= 1 && bottom <= 1 && left < right && top < bottom) {
 			// apply the movement to the crop fractions
-			cfg.left = left;
-			cfg.top = top;
-			cfg.right = right;
-			cfg.bottom = bottom;
+			config.left = left;
+			config.top = top;
+			config.right = right;
+			config.bottom = bottom;
 		}
 	};
-	// build the indicator
-	this.build();
 };
 
 // return as a require.js module

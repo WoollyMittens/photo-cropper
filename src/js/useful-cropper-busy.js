@@ -15,15 +15,18 @@ useful.Cropper.prototype.Busy = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	// methods
-	this.build = function () {
-		var cfg = this.parent.cfg;
+	this.init = function () {
+		var config = this.config;
 		// add a busy message
 		this.spinner = document.createElement('span');
 		this.spinner.className = 'cr-busy';
 		this.spinner.innerHTML = 'Please wait...';
 		this.spinner.style.visibility = 'hidden';
-		cfg.element.appendChild(this.spinner);
+		config.element.appendChild(this.spinner);
+		// return the object
+		return this;
 	};
 	this.show = function () {
 		// show the busy message
@@ -33,8 +36,6 @@ useful.Cropper.prototype.Busy = function (parent) {
 		// show the busy message
 		this.spinner.style.visibility = 'hidden';
 	};
-	// build the busy message
-	this.build();
 };
 
 // return as a require.js module

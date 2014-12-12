@@ -15,82 +15,82 @@ useful.Cropper.prototype.Handles = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
-	this.root = parent.parent;
+	this.config = parent.config;
 	// methods
-	this.build = function () {
-		var cfg = this.root.cfg;
+	this.init = function () {
+		var config = this.config;
 		var a, b, name;
 		// create the handles
-		cfg.handles = {};
-		for (a = 0, b = cfg.names.length; a < b; a += 1) {
-			name = cfg.names[a];
-			cfg.handles[name] = document.createElement('span');
-			cfg.handles[name].className = 'cr-' + name;
-			cfg.overlay.appendChild(cfg.handles[name]);
+		config.handles = {};
+		for (a = 0, b = config.names.length; a < b; a += 1) {
+			name = config.names[a];
+			config.handles[name] = document.createElement('span');
+			config.handles[name].className = 'cr-' + name;
+			config.overlay.appendChild(config.handles[name]);
 		}
+		// return the object
+		return this;
 	};
 	this.left = function (distance) {
-		var cfg = this.root.cfg;
+		var config = this.config;
 		var horizontal, left, right, limit;
 		// measure the movement in fractions of the dimensions
-		horizontal = distance / cfg.width;
+		horizontal = distance / config.width;
 		// calculate the new crop fractions
-		left = cfg.left + horizontal;
-		right = cfg.right + horizontal;
-		limit = cfg.right - cfg.minimum;
+		left = config.left + horizontal;
+		right = config.right + horizontal;
+		limit = config.right - config.minimum;
 		// if all are within limits
 		if (left >= 0 && left < limit) {
 			// apply the movement to the crop fractions
-			cfg.left = left;
+			config.left = left;
 		}
 	};
 	this.top = function (distance) {
-		var cfg = this.root.cfg;
+		var config = this.config;
 		var vertical, top, bottom, limit;
 		// measure the movement in fractions of the dimensions
-		vertical = distance / cfg.height;
+		vertical = distance / config.height;
 		// calculate the new crop fractions
-		top = cfg.top + vertical;
-		bottom = cfg.bottom + vertical;
-		limit = cfg.bottom - cfg.minimum;
+		top = config.top + vertical;
+		bottom = config.bottom + vertical;
+		limit = config.bottom - config.minimum;
 		// if all are within limits
 		if (top >= 0 && top < limit) {
 			// apply the movement to the crop fractions
-			cfg.top = top;
+			config.top = top;
 		}
 	};
 	this.right = function (distance) {
-		var cfg = this.root.cfg;
+		var config = this.config;
 		var horizontal, left, right, limit;
 		// measure the movement in fractions of the dimensions
-		horizontal = distance / cfg.width;
+		horizontal = distance / config.width;
 		// calculate the new crop fractions
-		left = cfg.left + horizontal;
-		right = cfg.right + horizontal;
-		limit = cfg.left + cfg.minimum;
+		left = config.left + horizontal;
+		right = config.right + horizontal;
+		limit = config.left + config.minimum;
 		// if all are within limits
 		if (right <= 1 && right > limit) {
 			// apply the movement to the crop fractions
-			cfg.right = right;
+			config.right = right;
 		}
 	};
 	this.bottom = function (distance) {
-		var cfg = this.root.cfg;
+		var config = this.config;
 		var vertical, top, bottom, limit;
 		// measure the movement in fractions of the dimensions
-		vertical = distance / cfg.height;
+		vertical = distance / config.height;
 		// calculate the new crop fractions
-		top = cfg.top + vertical;
-		bottom = cfg.bottom + vertical;
-		limit = cfg.top + cfg.minimum;
+		top = config.top + vertical;
+		bottom = config.bottom + vertical;
+		limit = config.top + config.minimum;
 		// if all are within limits
 		if (bottom <= 1 && bottom > limit) {
 			// apply the movement to the crop fractions
-			cfg.bottom = bottom;
+			config.bottom = bottom;
 		}
 	};
-	// build the handles
-	this.build();
 };
 
 // return as a require.js module

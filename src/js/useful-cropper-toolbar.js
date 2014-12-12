@@ -15,115 +15,123 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 	// properties
 	"use strict";
 	this.parent = parent;
+	this.config = parent.config;
 	this.ui = {};
 	// methods
+	this.init = function () {
+		// build the toolbar
+		if (!this.config.realtime) { this.build(); }
+		// return the object
+		return this;
+	};
 	this.build = function () {
-		var cfg = this.parent.cfg;
-		var context = this;
+		var config = this.config;
+		var _this = this;
 		// create the toolbar
-		cfg.toolbar = document.createElement('figcaption');
+		config.toolbar = document.createElement('figcaption');
 		// create the apply button
-		cfg.applyButton = document.createElement('button');
-		cfg.applyButton.setAttribute('type', 'button');
-		cfg.applyButton.className = 'cr-apply button';
-		cfg.applyButton.innerHTML = 'Apply';
-		cfg.toolbar.appendChild(cfg.applyButton);
-		cfg.applyButton.onclick = function () {
-			context.apply();
+		config.applyButton = document.createElement('button');
+		config.applyButton.setAttribute('type', 'button');
+		config.applyButton.className = 'cr-apply button';
+		config.applyButton.innerHTML = 'Apply';
+		config.toolbar.appendChild(config.applyButton);
+		config.applyButton.onclick = function () {
+			_this.apply();
 		};
 		// create the reset button
-		cfg.resetButton = document.createElement('button');
-		cfg.resetButton.setAttribute('type', 'button');
-		cfg.resetButton.className = 'cr-reset button';
-		cfg.resetButton.innerHTML = 'Reset';
-		cfg.toolbar.appendChild(cfg.resetButton);
-		cfg.resetButton.onclick = function () {
-			context.reset();
+		config.resetButton = document.createElement('button');
+		config.resetButton.setAttribute('type', 'button');
+		config.resetButton.className = 'cr-reset button';
+		config.resetButton.innerHTML = 'Reset';
+		config.toolbar.appendChild(config.resetButton);
+		config.resetButton.onclick = function () {
+			_this.reset();
 		};
 		// add the toolbar
-		cfg.element.appendChild(cfg.toolbar);
+		config.element.appendChild(config.toolbar);
 	};
 	this.apply = function () {
-		var cfg = this.parent.cfg;
-		var src, width, height, aspect;
-		var context = this;
-		// normalise the dimensions
-		width = cfg.overlay.offsetWidth;
-		height = cfg.overlay.offsetHeight;
-		aspect = cfg.element.offsetHeight / cfg.element.offsetWidth;
-		if (height / width < aspect) {
-			height = cfg.image.offsetWidth / width * cfg.overlay.offsetHeight;
-			width = cfg.image.offsetWidth;
-		} else {
-			width = cfg.image.offsetHeight / height * cfg.overlay.offsetWidth;
-			height = cfg.image.offsetHeight;
+		var config = this.config;
+		// if the apply button is enabled
+		if (!config.applyButton.disabled) {
+			var src, width, height, aspect;
+			var _this = this;
+			// normalise the dimensions
+			width = config.overlay.offsetWidth;
+			height = config.overlay.offsetHeight;
+			aspect = config.element.offsetHeight / config.element.offsetWidth;
+			if (height / width < aspect) {
+				height = config.image.offsetWidth / width * config.overlay.offsetHeight;
+				width = config.image.offsetWidth;
+			} else {
+				width = config.image.offsetHeight / height * config.overlay.offsetWidth;
+				height = config.image.offsetHeight;
+			}
+			// fix the container
+			config.element.style.width = config.image.offsetWidth + 'px';
+			config.element.style.height = config.image.offsetHeight + 'px';
+			// show busy message
+			this.parent.busy.show();
+			// upon loading
+			config.image.onload = function () {
+				// set the image to center
+				config.image.style.marginTop = Math.round((config.element.offsetHeight - config.image.offsetHeight - config.offset) / 2) + 'px';
+				// hide the busy message
+				_this.parent.busy.hide();
+			};
+			// round the numbers
+			width = Math.round(width);
+			height = Math.round(height);
+			// replace the image with a cropped version
+			src = config.image.src;
+			src = useful.urls.replace(src, 'width', width);
+			src = useful.urls.replace(src, 'height', height);
+			src = useful.urls.replace(src, 'left', config.left);
+			src = useful.urls.replace(src, 'top', config.top);
+			src = useful.urls.replace(src, 'right', config.right);
+			src = useful.urls.replace(src, 'bottom', config.bottom);
+			src = useful.urls.replace(src, 'time', new Date().getTime());
+			config.image.src = src;
+			// disable the indicator
+			config.applyButton.disabled = true;
+			config.element.className = config.element.className.replace(' cr-disabled', '') + ' cr-disabled';
+			// trigger any external onchange event
+			config.onchange(config.values);
 		}
-		// fix the container
-		cfg.element.style.width = cfg.image.offsetWidth + 'px';
-		cfg.element.style.height = cfg.image.offsetHeight + 'px';
-		// show busy message
-		this.parent.busy.show();
-		// upon loading
-		cfg.image.onload = function () {
-			// set the image to center
-			cfg.image.style.marginTop = Math.round((cfg.element.offsetHeight - cfg.image.offsetHeight - cfg.offset) / 2) + 'px';
-			// hide the busy message
-			context.parent.busy.hide();
-		};
-		// round the numbers
-		width = Math.round(width);
-		height = Math.round(height);
-		// replace the image with a cropped version
-		src = cfg.image.src;
-		src = useful.urls.replace(src, 'width', width);
-		src = useful.urls.replace(src, 'height', height);
-		src = useful.urls.replace(src, 'left', cfg.left);
-		src = useful.urls.replace(src, 'top', cfg.top);
-		src = useful.urls.replace(src, 'right', cfg.right);
-		src = useful.urls.replace(src, 'bottom', cfg.bottom);
-		src = useful.urls.replace(src, 'time', new Date().getTime());
-		cfg.image.src = src;
-		// disable the indicator
-		cfg.applyButton.disabled = true;
-		cfg.element.className = cfg.element.className.replace(' cr-disabled', '') + ' cr-disabled';
-		// trigger any external onchange event
-		cfg.onchange(cfg.values);
 		// cancel the click
 		return false;
 	};
 	this.reset = function () {
-		var cfg = this.parent.cfg;
-		var context = this;
+		var config = this.config;
+		var _this = this;
 		// show busy message
 		this.parent.busy.show();
 		// upon loading
-		cfg.image.onload = function () {
+		config.image.onload = function () {
 			// undo the margin
-			cfg.image.style.marginTop = 0;
+			config.image.style.marginTop = 0;
 			// undo the values
-			cfg.left = cfg.reset[0];
-			cfg.top = cfg.reset[1];
-			cfg.right = cfg.reset[2];
-			cfg.bottom = cfg.reset[3];
+			config.left = config.reset[0];
+			config.top = config.reset[1];
+			config.right = config.reset[2];
+			config.bottom = config.reset[3];
 			// reset the indicator
-			context.parent.update();
+			_this.parent.update();
 			// enable the indicator
-			cfg.applyButton.disabled = false;
-			cfg.element.className = cfg.element.className.replace(' cr-disabled', '');
+			config.applyButton.disabled = false;
+			config.element.className = config.element.className.replace(' cr-disabled', '');
 			// hide the busy message
-			context.parent.busy.hide();
+			_this.parent.busy.hide();
 		};
 		// replace the image with an uncropped version
-		cfg.url = useful.urls.replace(cfg.url, 'name', new Date().getTime());
-		cfg.image.src =  cfg.url;
-		cfg.overlay.style.backgroundImage = 'url(' + cfg.url + ')';
+		config.url = useful.urls.replace(config.url, 'name', new Date().getTime());
+		config.image.src =  config.url;
+		config.overlay.style.backgroundImage = 'url(' + config.url + ')';
 		// trigger any external onchange event
-		cfg.onchange(cfg.values);
+		config.onchange(config.values);
 		// cancel the click
 		return false;
 	};
-	// build the toolbar
-	if (!this.parent.cfg.realtime) { this.build(); }
 };
 
 // return as a require.js module

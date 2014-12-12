@@ -12,38 +12,44 @@ useful.Gestures = useful.Gestures || function () {};
 
 // extend the constructor
 useful.Gestures.prototype.Multi = function (parent) {
-	// properties
+
+	// PROPERTIES
+
 	"use strict";
 	this.parent = parent;
-	this.cfg = parent.cfg;
-	this.obj = parent.cfg.element;
+	this.config = parent.config;
+	this.element = parent.config.element;
 	this.gestureOrigin = null;
 	this.gestureProgression = null;
-	// methods
-	this.start = function () {
+
+	// METHODS
+
+	this.init = function () {
 		// set the required events for gestures
 		if ('ongesturestart' in window) {
-			this.obj.addEventListener('gesturestart', this.onStartGesture());
-			this.obj.addEventListener('gesturechange', this.onChangeGesture());
-			this.obj.addEventListener('gestureend', this.onEndGesture());
+			this.element.addEventListener('gesturestart', this.onStartGesture());
+			this.element.addEventListener('gesturechange', this.onChangeGesture());
+			this.element.addEventListener('gestureend', this.onEndGesture());
 		} else if ('msgesturestart' in window) {
-			this.obj.addEventListener('msgesturestart', this.onStartGesture());
-			this.obj.addEventListener('msgesturechange', this.onChangeGesture());
-			this.obj.addEventListener('msgestureend', this.onEndGesture());
+			this.element.addEventListener('msgesturestart', this.onStartGesture());
+			this.element.addEventListener('msgesturechange', this.onChangeGesture());
+			this.element.addEventListener('msgestureend', this.onEndGesture());
 		} else {
-			this.obj.addEventListener('touchstart', this.onStartFallback());
-			this.obj.addEventListener('touchmove', this.onChangeFallback());
-			this.obj.addEventListener('touchend', this.onEndFallback());
+			this.element.addEventListener('touchstart', this.onStartFallback());
+			this.element.addEventListener('touchmove', this.onChangeFallback());
+			this.element.addEventListener('touchend', this.onEndFallback());
 		}
-		// disable the start function so it can't be started twice
-		this.init = function () {};
+		// return the object
+		return this;
 	};
+
 	this.cancelGesture = function (event) {
-		if (this.cfg.cancelGesture) {
+		if (this.config.cancelGesture) {
 			event = event || window.event;
 			event.preventDefault();
 		}
 	};
+
 	this.startGesture = function (event) {
 		// if the functionality wasn't paused
 		if (!this.parent.paused) {
@@ -59,6 +65,7 @@ useful.Gestures.prototype.Multi = function (parent) {
 			};
 		}
 	};
+
 	this.changeGesture = function (event) {
 		// if there is an origin
 		if (this.gestureOrigin) {
@@ -68,14 +75,14 @@ useful.Gestures.prototype.Multi = function (parent) {
 			// get the coordinates from the event
 			var coords = this.parent.readEvent(event);
 			// get the gesture parameters
-			this.cfg.pinch({
+			this.config.pinch({
 				'x' : coords.x,
 				'y' : coords.y,
 				'scale' : scale - this.gestureProgression.scale,
 				'event' : event,
 				'target' : this.gestureOrigin.target
 			});
-			this.cfg.twist({
+			this.config.twist({
 				'x' : coords.x,
 				'y' : coords.y,
 				'rotation' : rotation - this.gestureProgression.rotation,
@@ -89,11 +96,14 @@ useful.Gestures.prototype.Multi = function (parent) {
 			};
 		}
 	};
+
 	this.endGesture = function () {
 		// note the start position
 		this.gestureOrigin = null;
 	};
-	// fallback functionality
+
+	// FALLBACK
+
 	this.startFallback = function (event) {
 		// if the functionality wasn't paused
 		if (!this.parent.paused && event.touches.length === 2) {
@@ -110,6 +120,7 @@ useful.Gestures.prototype.Multi = function (parent) {
 			};
 		}
 	};
+
 	this.changeFallback = function (event) {
 		// if there is an origin
 		if (this.gestureOrigin && event.touches.length === 2) {
@@ -121,7 +132,7 @@ useful.Gestures.prototype.Multi = function (parent) {
 			scale += (event.touches[0].pageY - event.touches[1].pageY) / (progression.touches[0].pageY - progression.touches[1].pageY);
 			scale = scale - 2;
 			// get the gesture parameters
-			this.cfg.pinch({
+			this.config.pinch({
 				'x' : coords.x,
 				'y' : coords.y,
 				'scale' : scale,
@@ -137,78 +148,86 @@ useful.Gestures.prototype.Multi = function (parent) {
 			};
 		}
 	};
+
 	this.endFallback = function () {
 		// note the start position
 		this.gestureOrigin = null;
 	};
-	// gesture events
+
+	// GESTURE EVENTS
+
 	this.onStartGesture = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
 			// optionally cancel the default behaviour
-			context.cancelGesture(event);
+			_this.cancelGesture(event);
 			// handle the event
-			context.startGesture(event);
-			context.changeGesture(event);
+			_this.startGesture(event);
+			_this.changeGesture(event);
 		};
 	};
+
 	this.onChangeGesture = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
 			// optionally cancel the default behaviour
-			context.cancelGesture(event);
+			_this.cancelGesture(event);
 			// handle the event
-			context.changeGesture(event);
+			_this.changeGesture(event);
 		};
 	};
+
 	this.onEndGesture = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
 			// handle the event
-			context.endGesture(event);
+			_this.endGesture(event);
 		};
 	};
-	// gesture events
+
+	// FALLBACK EVENTS
+
 	this.onStartFallback = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
 			// optionally cancel the default behaviour
-			//context.cancelGesture(event);
+			//_this.cancelGesture(event);
 			// handle the event
-			context.startFallback(event);
-			context.changeFallback(event);
+			_this.startFallback(event);
+			_this.changeFallback(event);
 		};
 	};
+
 	this.onChangeFallback = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
 			// optionally cancel the default behaviour
-			context.cancelGesture(event);
+			_this.cancelGesture(event);
 			// handle the event
-			context.changeFallback(event);
+			_this.changeFallback(event);
 		};
 	};
+
 	this.onEndFallback = function () {
-		// store the context
-		var context = this;
+		// store the _this
+		var _this = this;
 		// return and event handler
 		return function (event) {
 			// handle the event
-			context.endGesture(event);
+			_this.endGesture(event);
 		};
 	};
-	// go
-	this.start();
+
 };
 
 // return as a require.js module
