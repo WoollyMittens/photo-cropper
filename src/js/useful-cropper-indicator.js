@@ -12,12 +12,16 @@ useful.Cropper = useful.Cropper || function () {};
 
 // extend the constructor
 useful.Cropper.prototype.Indicator = function (parent) {
-	// properties
+
+	// PROPERTIES
+	
 	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
 	this.context = parent.context;
-	// methods
+
+	// METHODS
+	
 	this.init = function () {
 		var config = this.config;
 		// create the indicator
@@ -84,6 +88,7 @@ useful.Cropper.prototype.Indicator = function (parent) {
 		// return the object
 		return this;
 	};
+	
 	this.update = function () {
 		var config = this.config;
 		var left, top, right, bottom;
@@ -103,6 +108,7 @@ useful.Cropper.prototype.Indicator = function (parent) {
 		// reposition the background image
 		config.overlay.style.backgroundPosition = '-' + left + 'px -' + top + 'px';
 	};
+	
 	this.move = function (x, y) {
 		var config = this.config;
 		var horizontal, vertical, left, top, right, bottom;

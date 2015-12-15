@@ -12,11 +12,15 @@ useful.Cropper = useful.Cropper || function () {};
 
 // extend the constructor
 useful.Cropper.prototype.Handles = function (parent) {
-	// properties
+
+	// PROPERTIES
+	
 	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
-	// methods
+
+	// METHODS
+	
 	this.init = function () {
 		var config = this.config;
 		var a, b, name;
@@ -31,6 +35,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 		// return the object
 		return this;
 	};
+	
 	this.left = function (distance) {
 		var config = this.config;
 		var horizontal, left, right, limit;
@@ -46,6 +51,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 			config.left = left;
 		}
 	};
+	
 	this.top = function (distance) {
 		var config = this.config;
 		var vertical, top, bottom, limit;
@@ -61,6 +67,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 			config.top = top;
 		}
 	};
+	
 	this.right = function (distance) {
 		var config = this.config;
 		var horizontal, left, right, limit;
@@ -76,6 +83,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 			config.right = right;
 		}
 	};
+	
 	this.bottom = function (distance) {
 		var config = this.config;
 		var vertical, top, bottom, limit;

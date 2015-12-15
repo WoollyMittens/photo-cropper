@@ -12,11 +12,15 @@ useful.Cropper = useful.Cropper || function () {};
 
 // extend the constructor
 useful.Cropper.prototype.Busy = function (parent) {
-	// properties
+
+	// PROPERTIES
+	
 	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
-	// methods
+
+	// METHODS
+	
 	this.init = function () {
 		var config = this.config;
 		// add a busy message
@@ -28,10 +32,12 @@ useful.Cropper.prototype.Busy = function (parent) {
 		// return the object
 		return this;
 	};
+	
 	this.show = function () {
 		// show the busy message
 		this.spinner.style.visibility = 'visible';
 	};
+	
 	this.hide = function () {
 		// show the busy message
 		this.spinner.style.visibility = 'hidden';

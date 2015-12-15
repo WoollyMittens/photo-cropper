@@ -41,7 +41,7 @@ var cropper = new useful.Cropper().init({
 	'delay' : 1000,
 	'realtime' : false,
 	'offset' : 2,
-	'slice' : './php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
+	'slice' : 'php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
 });
 ```
 
@@ -101,15 +101,15 @@ Reset the cropper.
 
 This project uses node.js from http://nodejs.org/
 
-This project uses grunt.js from http://gruntjs.com/
+This project uses gulp.js from http://gulpjs.com/
 
 The following commands are available for development:
 + `npm install` - Installs the prerequisites.
-+ `grunt import` - Re-imports libraries from supporting projects to `./src/libs/` if available under the same folder tree.
-+ `grunt dev` - Builds the project for development purposes.
-+ `grunt prod` - Builds the project for deployment purposes.
-+ `grunt watch` - Continuously recompiles updated files during development sessions.
-+ `grunt serve` - Serves the project on a temporary web server at http://localhost:8000/ .
++ `gulp import` - Re-imports libraries from supporting projects to `./src/libs/` if available under the same folder tree.
++ `gulp dev` - Builds the project for development purposes.
++ `gulp prod` - Builds the project for deployment purposes.
++ `gulp watch` - Continuously recompiles updated files during development sessions.
++ `gulp serve` - Serves the project on a temporary web server at http://localhost:8000/ .
 
 ## License
 

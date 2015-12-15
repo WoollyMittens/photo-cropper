@@ -12,7 +12,9 @@ useful.Cropper = useful.Cropper || function () {};
 
 // extend the constructor
 useful.Cropper.prototype.Main = function (config, context) {
-	// properties
+
+	// PROPERTIES
+	
 	"use strict";
 	this.config = config;
 	this.context = context;
@@ -29,11 +31,15 @@ useful.Cropper.prototype.Main = function (config, context) {
 	this.config.url = config.image.src;
 	this.config.offset = config.offset || 4;
 	this.config.reset = [config.left, config.top, config.right, config.bottom];
-	// components
+
+	// COMPONENTS
+	
 	this.busy = new this.context.Busy(this).init();
 	this.indicator = new this.context.Indicator(this).init();
 	this.toolbar = new this.context.Toolbar(this).init();
-	// methods
+
+	// METHODS
+	
 	this.init = function () {
 		var config = this.config;
 		// if the image has loaded
@@ -54,6 +60,7 @@ useful.Cropper.prototype.Main = function (config, context) {
 		// return the object
 		return this;
 	};
+	
 	this.preset = function () {
 		var query, width, height, aspect, config = this.config;
 		// if there's anything to measure yet
@@ -109,6 +116,7 @@ useful.Cropper.prototype.Main = function (config, context) {
 			}
 		}
 	};
+	
 	this.correct = function (handle) {
 		var config = this.config;
 		// determine the dominant motion
@@ -149,6 +157,7 @@ useful.Cropper.prototype.Main = function (config, context) {
 				break;
 		}
 	};
+	
 	this.update = function (values, changed, handle) {
 		var config = this.config;
 		changed = (changed === true);

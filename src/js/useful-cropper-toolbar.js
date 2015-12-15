@@ -12,18 +12,23 @@ useful.Cropper = useful.Cropper || function () {};
 
 // extend the constructor
 useful.Cropper.prototype.Toolbar = function (parent) {
-	// properties
+
+	// PROPERTIES
+	
 	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
 	this.ui = {};
-	// methods
+
+	// METHODS
+	
 	this.init = function () {
 		// build the toolbar
 		if (!this.config.realtime) { this.build(); }
 		// return the object
 		return this;
 	};
+	
 	this.build = function () {
 		var config = this.config;
 		var _this = this;
@@ -50,6 +55,7 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 		// add the toolbar
 		config.element.appendChild(config.toolbar);
 	};
+	
 	this.apply = function () {
 		var config = this.config;
 		// if the apply button is enabled
@@ -101,6 +107,7 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 		// cancel the click
 		return false;
 	};
+	
 	this.reset = function () {
 		var config = this.config;
 		var _this = this;
