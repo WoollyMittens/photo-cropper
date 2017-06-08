@@ -27,9 +27,9 @@ useful.Gestures.prototype.Main = function (config, context) {
 		// check the configuration properties
 		this.config = this.checkConfig(config);
 		// add the single touch events
-		this.single = new this.context.Single(this).init();
+		if (config.allowSingle) { this.single = new this.context.Single(this).init(); }
 		// add the multi touch events
-		this.multi = new this.context.Multi(this).init();
+		if (config.allowMulti) { this.multi = new this.context.Multi(this).init(); }
 		// return the object
 		return this;
 	};
@@ -42,14 +42,21 @@ useful.Gestures.prototype.Main = function (config, context) {
 		if (config.cancelTouch === undefined || config.cancelTouch === null) { config.cancelTouch = true; }
 		if (config.cancelGesture === undefined || config.cancelGesture === null) { config.cancelGesture = true; }
 		// add dummy event handlers for missing ones
-		config.swipeUp = config.swipeUp || function () {};
-		config.swipeLeft = config.swipeLeft || function () {};
-		config.swipeRight = config.swipeRight || function () {};
-		config.swipeDown = config.swipeDown || function () {};
-		config.drag = config.drag || function () {};
-		config.pinch = config.pinch || function () {};
-		config.twist = config.twist || function () {};
-		config.doubleTap = config.doubleTap || function () {};
+		if (config.swipeUp || config.swipeLeft || config.swipeRight || config.swipeDown || config.drag || config.doubleTap) {
+			config.allowSingle = true;
+			config.swipeUp = config.swipeUp || function () {};
+			config.swipeLeft = config.swipeLeft || function () {};
+			config.swipeRight = config.swipeRight || function () {};
+			config.swipeDown = config.swipeDown || function () {};
+			config.drag = config.drag || function () {};
+			config.doubleTap = config.doubleTap || function () {};
+		}
+		// if there's pinch there's also twist
+		if (config.pinch || config.twist) {
+			config.allowMulti = true;
+			config.pinch = config.pinch || function () {};
+			config.twist = config.twist || function () {};
+		}
 		// return the fixed config
 		return config;
 	};

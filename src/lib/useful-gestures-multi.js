@@ -25,6 +25,9 @@ useful.Gestures.prototype.Multi = function (parent) {
 	// METHODS
 
 	this.init = function () {
+		// set the required events for mouse
+		this.element.addEventListener('mousewheel', this.onChangeWheel());
+		if (navigator.userAgent.match(/firefox/gi)) { this.element.addEventListener('DOMMouseScroll', this.onChangeWheel()); }
 		// set the required events for gestures
 		if ('ongesturestart' in window) {
 			this.element.addEventListener('gesturestart', this.onStartGesture());
@@ -154,6 +157,23 @@ useful.Gestures.prototype.Multi = function (parent) {
 		this.gestureOrigin = null;
 	};
 
+	this.changeWheel = function (event) {
+		// measure the wheel distance
+		var scale = 1, distance = ((window.event) ? window.event.wheelDelta / 120 : -event.detail / 3);
+		// get the coordinates from the event
+		var coords = this.parent.readEvent(event);
+		// equate wheeling up / down to zooming in / out
+		scale = (distance > 0) ? +this.config.increment : scale = -this.config.increment;
+		// report the zoom
+		this.config.pinch({
+			'x' : coords.x,
+			'y' : coords.y,
+			'scale' : scale,
+			'event' : event,
+			'source' : event.target || event.srcElement
+		});
+	};
+
 	// GESTURE EVENTS
 
 	this.onStartGesture = function () {
@@ -225,6 +245,22 @@ useful.Gestures.prototype.Multi = function (parent) {
 		return function (event) {
 			// handle the event
 			_this.endGesture(event);
+		};
+	};
+
+	// MOUSE EVENTS
+
+	this.onChangeWheel = function () {
+		// store the _this
+		var _this = this;
+		// return and event handler
+		return function (event) {
+			// get event elementect
+			event = event || window.event;
+			// optionally cancel the default behaviour
+			_this.cancelGesture(event);
+			// handle the event
+			_this.changeWheel(event);
 		};
 	};
 

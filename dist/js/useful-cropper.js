@@ -27,9 +27,9 @@ useful.Gestures.prototype.Main = function (config, context) {
 		// check the configuration properties
 		this.config = this.checkConfig(config);
 		// add the single touch events
-		this.single = new this.context.Single(this).init();
+		if (config.allowSingle) { this.single = new this.context.Single(this).init(); }
 		// add the multi touch events
-		this.multi = new this.context.Multi(this).init();
+		if (config.allowMulti) { this.multi = new this.context.Multi(this).init(); }
 		// return the object
 		return this;
 	};
@@ -42,14 +42,21 @@ useful.Gestures.prototype.Main = function (config, context) {
 		if (config.cancelTouch === undefined || config.cancelTouch === null) { config.cancelTouch = true; }
 		if (config.cancelGesture === undefined || config.cancelGesture === null) { config.cancelGesture = true; }
 		// add dummy event handlers for missing ones
-		config.swipeUp = config.swipeUp || function () {};
-		config.swipeLeft = config.swipeLeft || function () {};
-		config.swipeRight = config.swipeRight || function () {};
-		config.swipeDown = config.swipeDown || function () {};
-		config.drag = config.drag || function () {};
-		config.pinch = config.pinch || function () {};
-		config.twist = config.twist || function () {};
-		config.doubleTap = config.doubleTap || function () {};
+		if (config.swipeUp || config.swipeLeft || config.swipeRight || config.swipeDown || config.drag || config.doubleTap) {
+			config.allowSingle = true;
+			config.swipeUp = config.swipeUp || function () {};
+			config.swipeLeft = config.swipeLeft || function () {};
+			config.swipeRight = config.swipeRight || function () {};
+			config.swipeDown = config.swipeDown || function () {};
+			config.drag = config.drag || function () {};
+			config.doubleTap = config.doubleTap || function () {};
+		}
+		// if there's pinch there's also twist
+		if (config.pinch || config.twist) {
+			config.allowMulti = true;
+			config.pinch = config.pinch || function () {};
+			config.twist = config.twist || function () {};
+		}
 		// return the fixed config
 		return config;
 	};
@@ -137,6 +144,9 @@ useful.Gestures.prototype.Multi = function (parent) {
 	// METHODS
 
 	this.init = function () {
+		// set the required events for mouse
+		this.element.addEventListener('mousewheel', this.onChangeWheel());
+		if (navigator.userAgent.match(/firefox/gi)) { this.element.addEventListener('DOMMouseScroll', this.onChangeWheel()); }
 		// set the required events for gestures
 		if ('ongesturestart' in window) {
 			this.element.addEventListener('gesturestart', this.onStartGesture());
@@ -266,6 +276,23 @@ useful.Gestures.prototype.Multi = function (parent) {
 		this.gestureOrigin = null;
 	};
 
+	this.changeWheel = function (event) {
+		// measure the wheel distance
+		var scale = 1, distance = ((window.event) ? window.event.wheelDelta / 120 : -event.detail / 3);
+		// get the coordinates from the event
+		var coords = this.parent.readEvent(event);
+		// equate wheeling up / down to zooming in / out
+		scale = (distance > 0) ? +this.config.increment : scale = -this.config.increment;
+		// report the zoom
+		this.config.pinch({
+			'x' : coords.x,
+			'y' : coords.y,
+			'scale' : scale,
+			'event' : event,
+			'source' : event.target || event.srcElement
+		});
+	};
+
 	// GESTURE EVENTS
 
 	this.onStartGesture = function () {
@@ -340,6 +367,22 @@ useful.Gestures.prototype.Multi = function (parent) {
 		};
 	};
 
+	// MOUSE EVENTS
+
+	this.onChangeWheel = function () {
+		// store the _this
+		var _this = this;
+		// return and event handler
+		return function (event) {
+			// get event elementect
+			event = event || window.event;
+			// optionally cancel the default behaviour
+			_this.cancelGesture(event);
+			// handle the event
+			_this.changeWheel(event);
+		};
+	};
+
 };
 
 // return as a require.js module
@@ -379,8 +422,6 @@ useful.Gestures.prototype.Single = function (parent) {
 		this.element.addEventListener('mousedown', this.onStartTouch());
 		this.element.addEventListener('mousemove', this.onChangeTouch());
 		document.body.addEventListener('mouseup', this.onEndTouch());
-		this.element.addEventListener('mousewheel', this.onChangeWheel());
-		if (navigator.userAgent.match(/firefox/gi)) { this.element.addEventListener('DOMMouseScroll', this.onChangeWheel()); }
 		// set the required events for touch
 		this.element.addEventListener('touchstart', this.onStartTouch());
 		this.element.addEventListener('touchmove', this.onChangeTouch());
@@ -492,23 +533,6 @@ useful.Gestures.prototype.Single = function (parent) {
 		this.touchOrigin = null;
 	};
 
-	this.changeWheel = function (event) {
-		// measure the wheel distance
-		var scale = 1, distance = ((window.event) ? window.event.wheelDelta / 120 : -event.detail / 3);
-		// get the coordinates from the event
-		var coords = this.parent.readEvent(event);
-		// equate wheeling up / down to zooming in / out
-		scale = (distance > 0) ? +this.config.increment : scale = -this.config.increment;
-		// report the zoom
-		this.config.pinch({
-			'x' : coords.x,
-			'y' : coords.y,
-			'scale' : scale,
-			'event' : event,
-			'source' : event.target || event.srcElement
-		});
-	};
-
 	// TOUCH EVENTS
 
 	this.onStartTouch = function () {
@@ -547,22 +571,6 @@ useful.Gestures.prototype.Single = function (parent) {
 			event = event || window.event;
 			// handle the event
 			_this.endTouch(event);
-		};
-	};
-
-	// MOUSE EVENTS
-
-	this.onChangeWheel = function () {
-		// store the _this
-		var _this = this;
-		// return and event handler
-		return function (event) {
-			// get event elementect
-			event = event || window.event;
-			// optionally cancel the default behaviour
-			_this.cancelTouch(event);
-			// handle the event
-			_this.changeWheel(event);
 		};
 	};
 
