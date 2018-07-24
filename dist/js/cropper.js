@@ -1,21 +1,56 @@
 /*
 	Source:
-	van Creij, Maurice (2014). "useful.gestures.js: A library of useful functions to ease working with touch and gestures.", version 20141127, http://www.woollymittens.nl/.
+	van Creij, Maurice (2018). "gestures.js: A library of useful functions to ease working with touch and gestures.", http://www.woollymittens.nl/.
 
 	License:
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
 */
 
-// create the constructor if needed
-var useful = useful || {};
-useful.Gestures = useful.Gestures || function () {};
-
 // extend the constructor
-useful.Gestures.prototype.Main = function (config, context) {
+var Gestures = function (config) {
 
 	// PROPERTIES
 
-	"use strict";
+	// METHODS
+
+	this.only = function (config) {
+		// start an instance of the script
+		return new this.Main(config, this);
+	};
+
+	this.each = function (config) {
+		var _config, _context = this, instances = [];
+		// for all element
+		for (var a = 0, b = config.elements.length; a < b; a += 1) {
+			// clone the configuration
+			_config = Object.create(config);
+			// insert the current element
+			_config.element = config.elements[a];
+			// delete the list of elements from the clone
+			delete _config.elements;
+			// start a new instance of the object
+			instances[a] = new this.Main(_config, _context);
+		}
+		// return the instances
+		return instances;
+	};
+
+	// START
+
+	return (config.elements) ? this.each(config) : this.only(config);
+
+};
+
+// return as a require.js module
+if (typeof module !== 'undefined') {
+	exports = module.exports = Gestures;
+}
+
+// extend the class
+Gestures.prototype.Main = function (config, context) {
+
+	// PROPERTIES
+
 	this.config = config;
 	this.context = context;
 	this.element = config.element;
@@ -27,11 +62,9 @@ useful.Gestures.prototype.Main = function (config, context) {
 		// check the configuration properties
 		this.config = this.checkConfig(config);
 		// add the single touch events
-		if (config.allowSingle) { this.single = new this.context.Single(this).init(); }
+		if (config.allowSingle) { this.single = new this.context.Single(this); }
 		// add the multi touch events
-		if (config.allowMulti) { this.multi = new this.context.Multi(this).init(); }
-		// return the object
-		return this;
+		if (config.allowMulti) { this.multi = new this.context.Multi(this); }
 	};
 
 	this.checkConfig = function (config) {
@@ -110,31 +143,17 @@ useful.Gestures.prototype.Main = function (config, context) {
 		this.config.cancelGesture = true;
 	};
 
+	// EVENTS
+
+	this.init();
+
 };
 
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Gestures.Main;
-}
-
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.gestures.js: A library of useful functions to ease working with touch and gestures.", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Gestures = useful.Gestures || function () {};
-
-// extend the constructor
-useful.Gestures.prototype.Multi = function (parent) {
+// extend the class
+Gestures.prototype.Multi = function (parent) {
 
 	// PROPERTIES
 
-	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
 	this.element = parent.config.element;
@@ -161,8 +180,6 @@ useful.Gestures.prototype.Multi = function (parent) {
 			this.element.addEventListener('touchmove', this.onChangeFallback());
 			this.element.addEventListener('touchend', this.onEndFallback());
 		}
-		// return the object
-		return this;
 	};
 
 	this.cancelGesture = function (event) {
@@ -383,31 +400,17 @@ useful.Gestures.prototype.Multi = function (parent) {
 		};
 	};
 
+	// EVENTS
+
+	this.init();
+
 };
 
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Gestures.Multi;
-}
-
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.gestures.js: A library of useful functions to ease working with touch and gestures.", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Gestures = useful.Gestures || function () {};
-
-// extend the constructor
-useful.Gestures.prototype.Single = function (parent) {
+// extend the class
+Gestures.prototype.Single = function (parent) {
 
 	// PROPERTIES
 
-	"use strict";
 	this.parent = parent;
 	this.config = parent.config;
 	this.element = parent.config.element;
@@ -429,8 +432,6 @@ useful.Gestures.prototype.Single = function (parent) {
 		this.element.addEventListener('mspointerdown', this.onStartTouch());
 		this.element.addEventListener('mspointermove', this.onChangeTouch());
 		document.body.addEventListener('mspointerup', this.onEndTouch());
-		// return the object
-		return this;
 	};
 
 	this.cancelTouch = function (event) {
@@ -574,39 +575,172 @@ useful.Gestures.prototype.Single = function (parent) {
 		};
 	};
 
-};
+	// EVENTS
 
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Gestures.Single;
-}
+	this.init();
+
+};
 
 /*
 	Source:
-	van Creij, Maurice (2014). "useful.gestures.js: A library of useful functions to ease working with touch and gestures.", version 20141127, http://www.woollymittens.nl/.
+	van Creij, Maurice (2018). "urls.js: A library of useful functions to ease working with URL query parameters.", http://www.woollymittens.nl/.
 
 	License:
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
 */
 
-// create the constructor if needed
-var useful = useful || {};
-useful.Gestures = useful.Gestures || function () {};
+var urls = {
 
-// extend the constructor
-useful.Gestures.prototype.init = function (config) {
+	// retrieves the query parameters from an url
+	load: function (url) {
+		var a, b, parts = [], data = {}, namevalue, value;
+		parts = url.split('#')[0].replace('?', '&').split('&');
+		for (a = 1, b = parts.length; a < b; a += 1) {
+			namevalue = parts[a].split('=');
+			value = parseFloat(namevalue[1]);
+			data[namevalue[0]] = (!isNaN(value)) ? value : namevalue[1];
+		}
+		return data;
+	},
 
-	// PROPERTIES
-	
-	"use strict";
+	// stores query parameters to an url
+	save: function (url, data) {
+		var name;
+		// clean the url
+		url = url.split('?')[0].split('#')[0];
+		// for all name value pairs
+		for (name in data) {
+			if (data.hasOwnProperty(name)) {
+				// add them to the url
+				url += '&' + name + '=' + data[name];
+			}
+		}
+		// make sure the first value starts with a ?
+		return url.replace('&', '?');
+	},
 
-	// METHODS
-	
+	// replace a value in a query parameter
+	replace: function (url, name, value) {
+		var old, match, nameValue;
+		// if the value is present in the url
+		match = new RegExp(name + '=', 'gi');
+		if (match.test(url)) {
+			// isolate the old value
+			old  = url.split('#')[0].split(name + '=')[1].split('&')[0];
+			// insert the new value
+			return url.replace(name + '=' + old, name + '=' + value);
+		} else {
+			// add the value instead of replacing it
+			nameValue = this.load(url);
+			nameValue[name] = value;
+			return this.save(url, nameValue);
+		}
+	},
+
+	// source - http://phpjs.org/functions/base64_encode/
+	// http://kevin.vanzonneveld.net
+	// +  original by: Tyler Akins (http://rumkin.com)
+	// +  improved by: Bayron Guevara
+	// +  improved by: Thunder.m
+	// +  improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	// +  bugfixed by: Pellentesque Malesuada
+	// +  improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	// +  improved by: Rafał Kukawski (http://kukawski.pl)
+	// *   example 1: base64_encode('Kevin van Zonneveld');
+	// *   returns 1: 'S2V2aW4gdmFuIFpvbm5ldmVsZA=='
+	encode: function (data) {
+		var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+		var o1, o2, o3, h1, h2, h3, h4, bits, i = 0,
+			ac = 0,
+			enc = "",
+			tmpArr = [];
+		if (!data) {
+			return data;
+		}
+		do { // pack three octets into four hexets
+			o1 = data.charCodeAt(i++);
+			o2 = data.charCodeAt(i++);
+			o3 = data.charCodeAt(i++);
+			bits = o1 << 16 | o2 << 8 | o3;
+			h1 = bits >> 18 & 0x3f;
+			h2 = bits >> 12 & 0x3f;
+			h3 = bits >> 6 & 0x3f;
+			h4 = bits & 0x3f;
+			// use hexets to index into b64, and append result to encoded string
+			tmpArr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
+		} while (i < data.length);
+		enc = tmpArr.join('');
+		var r = data.length % 3;
+		return (r ? enc.slice(0, r - 3) : enc) + '==='.slice(r || 3);
+	},
+
+	// source - http://phpjs.org/functions/base64_decode/
+	// http://kevin.vanzonneveld.net
+	// +  original by: Tyler Akins (http://rumkin.com)
+	// +  improved by: Thunder.m
+	// +   input by: Aman Gupta
+	// +  improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	// +  bugfixed by: Onno Marsman
+	// +  bugfixed by: Pellentesque Malesuada
+	// +  improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	// +   input by: Brett Zamir (http://brett-zamir.me)
+	// +  bugfixed by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	// *   example 1: base64_decode('S2V2aW4gdmFuIFpvbm5ldmVsZA==');
+	// *   returns 1: 'Kevin van Zonneveld'
+	decode: function (data) {
+		var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+		var o1, o2, o3, h1, h2, h3, h4, bits, i = 0,
+			ac = 0,
+			dec = "",
+			tmpArr = [];
+		if (!data) {
+			return data;
+		}
+		data += '';
+		do { // unpack four hexets into three octets using index points in b64
+			h1 = b64.indexOf(data.charAt(i++));
+			h2 = b64.indexOf(data.charAt(i++));
+			h3 = b64.indexOf(data.charAt(i++));
+			h4 = b64.indexOf(data.charAt(i++));
+			bits = h1 << 18 | h2 << 12 | h3 << 6 | h4;
+			o1 = bits >> 16 & 0xff;
+			o2 = bits >> 8 & 0xff;
+			o3 = bits & 0xff;
+			if (h3 == 64) {
+				tmpArr[ac++] = String.fromCharCode(o1);
+			} else if (h4 == 64) {
+				tmpArr[ac++] = String.fromCharCode(o1, o2);
+			} else {
+				tmpArr[ac++] = String.fromCharCode(o1, o2, o3);
+			}
+		} while (i < data.length);
+		dec = tmpArr.join('');
+		return dec;
+	}
+
+};
+
+// return as a require.js module
+if (typeof module !== 'undefined') {
+	exports = module.exports = urls;
+}
+
+/*
+	Source:
+	van Creij, Maurice (2018). "photowall.js: Simple photo wall", http://www.woollymittens.nl/.
+
+	License:
+	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
+*/
+
+// establish the class
+var Cropper = function (config) {
+
 	this.only = function (config) {
 		// start an instance of the script
-		return new this.Main(config, this).init();
+		return new this.Main(config, this);
 	};
-	
+
 	this.each = function (config) {
 		var _config, _context = this, instances = [];
 		// for all element
@@ -615,16 +749,12 @@ useful.Gestures.prototype.init = function (config) {
 			_config = Object.create(config);
 			// insert the current element
 			_config.element = config.elements[a];
-			// delete the list of elements from the clone
-			delete _config.elements;
 			// start a new instance of the object
-			instances[a] = new this.Main(_config, _context).init();
+			instances[a] = new this.Main(_config, _context);
 		}
 		// return the instances
 		return instances;
 	};
-
-	// START
 
 	return (config.elements) ? this.each(config) : this.only(config);
 
@@ -632,612 +762,19 @@ useful.Gestures.prototype.init = function (config) {
 
 // return as a require.js module
 if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Gestures;
+	exports = module.exports = Cropper;
 }
 
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.polyfills.js: A library of useful polyfills to ease working with HTML5 in legacy environments.", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// public object
-var useful = useful || {};
-
-(function() {
-
-  // Invoke strict mode
-  "use strict";
-
-  // Create a private object for this library
-  useful.polyfills = {
-
-    // enabled the use of HTML5 elements in Internet Explorer
-    html5: function() {
-      var a, b, elementsList = ['section', 'nav', 'article', 'aside', 'hgroup', 'header', 'footer', 'dialog', 'mark', 'dfn', 'time', 'progress', 'meter', 'ruby', 'rt', 'rp', 'ins', 'del', 'figure', 'figcaption', 'video', 'audio', 'source', 'canvas', 'datalist', 'keygen', 'output', 'details', 'datagrid', 'command', 'bb', 'menu', 'legend'];
-      if (navigator.userAgent.match(/msie/gi)) {
-        for (a = 0, b = elementsList.length; a < b; a += 1) {
-          document.createElement(elementsList[a]);
-        }
-      }
-    },
-
-    // allow array.indexOf in older browsers
-    arrayIndexOf: function() {
-      if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function(obj, start) {
-          for (var i = (start || 0), j = this.length; i < j; i += 1) {
-            if (this[i] === obj) {
-              return i;
-            }
-          }
-          return -1;
-        };
-      }
-    },
-
-    // allow array.isArray in older browsers
-    arrayIsArray: function() {
-      if (!Array.isArray) {
-        Array.isArray = function(arg) {
-          return Object.prototype.toString.call(arg) === '[object Array]';
-        };
-      }
-    },
-
-    // allow array.map in older browsers (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
-    arrayMap: function() {
-
-      // Production steps of ECMA-262, Edition 5, 15.4.4.19
-      // Reference: http://es5.github.io/#x15.4.4.19
-      if (!Array.prototype.map) {
-
-        Array.prototype.map = function(callback, thisArg) {
-
-          var T, A, k;
-
-          if (this == null) {
-            throw new TypeError(' this is null or not defined');
-          }
-
-          // 1. Let O be the result of calling ToObject passing the |this|
-          //    value as the argument.
-          var O = Object(this);
-
-          // 2. Let lenValue be the result of calling the Get internal
-          //    method of O with the argument "length".
-          // 3. Let len be ToUint32(lenValue).
-          var len = O.length >>> 0;
-
-          // 4. If IsCallable(callback) is false, throw a TypeError exception.
-          // See: http://es5.github.com/#x9.11
-          if (typeof callback !== 'function') {
-            throw new TypeError(callback + ' is not a function');
-          }
-
-          // 5. If thisArg was supplied, let T be thisArg; else let T be undefined.
-          if (arguments.length > 1) {
-            T = thisArg;
-          }
-
-          // 6. Let A be a new array created as if by the expression new Array(len)
-          //    where Array is the standard built-in constructor with that name and
-          //    len is the value of len.
-          A = new Array(len);
-
-          // 7. Let k be 0
-          k = 0;
-
-          // 8. Repeat, while k < len
-          while (k < len) {
-
-            var kValue, mappedValue;
-
-            // a. Let Pk be ToString(k).
-            //   This is implicit for LHS operands of the in operator
-            // b. Let kPresent be the result of calling the HasProperty internal
-            //    method of O with argument Pk.
-            //   This step can be combined with c
-            // c. If kPresent is true, then
-            if (k in O) {
-
-              // i. Let kValue be the result of calling the Get internal
-              //    method of O with argument Pk.
-              kValue = O[k];
-
-              // ii. Let mappedValue be the result of calling the Call internal
-              //     method of callback with T as the this value and argument
-              //     list containing kValue, k, and O.
-              mappedValue = callback.call(T, kValue, k, O);
-
-              // iii. Call the DefineOwnProperty internal method of A with arguments
-              // Pk, Property Descriptor
-              // { Value: mappedValue,
-              //   Writable: true,
-              //   Enumerable: true,
-              //   Configurable: true },
-              // and false.
-
-              // In browsers that support Object.defineProperty, use the following:
-              // Object.defineProperty(A, k, {
-              //   value: mappedValue,
-              //   writable: true,
-              //   enumerable: true,
-              //   configurable: true
-              // });
-
-              // For best browser support, use the following:
-              A[k] = mappedValue;
-            }
-            // d. Increase k by 1.
-            k++;
-          }
-
-          // 9. return A
-          return A;
-        };
-      }
-
-    },
-
-    // allow document.querySelectorAll (https://gist.github.com/connrs/2724353)
-    querySelectorAll: function() {
-      if (!document.querySelectorAll) {
-        document.querySelectorAll = function(a) {
-          var b = document,
-            c = b.documentElement.firstChild,
-            d = b.createElement("STYLE");
-          return c.appendChild(d), b.__qsaels = [], d.styleSheet.cssText = a + "{x:expression(document.__qsaels.push(this))}", window.scrollBy(0, 0), b.__qsaels;
-        };
-      }
-    },
-
-    // allow addEventListener (https://gist.github.com/jonathantneal/3748027)
-    addEventListener: function() {
-      !window.addEventListener && (function(WindowPrototype, DocumentPrototype, ElementPrototype, addEventListener, removeEventListener, dispatchEvent, registry) {
-        WindowPrototype[addEventListener] = DocumentPrototype[addEventListener] = ElementPrototype[addEventListener] = function(type, listener) {
-          var target = this;
-          registry.unshift([target, type, listener, function(event) {
-            event.currentTarget = target;
-            event.preventDefault = function() {
-              event.returnValue = false;
-            };
-            event.stopPropagation = function() {
-              event.cancelBubble = true;
-            };
-            event.target = event.srcElement || target;
-            listener.call(target, event);
-          }]);
-          this.attachEvent("on" + type, registry[0][3]);
-        };
-        WindowPrototype[removeEventListener] = DocumentPrototype[removeEventListener] = ElementPrototype[removeEventListener] = function(type, listener) {
-          for (var index = 0, register; register = registry[index]; ++index) {
-            if (register[0] == this && register[1] == type && register[2] == listener) {
-              return this.detachEvent("on" + type, registry.splice(index, 1)[0][3]);
-            }
-          }
-        };
-        WindowPrototype[dispatchEvent] = DocumentPrototype[dispatchEvent] = ElementPrototype[dispatchEvent] = function(eventObject) {
-          return this.fireEvent("on" + eventObject.type, eventObject);
-        };
-      })(Window.prototype, HTMLDocument.prototype, Element.prototype, "addEventListener", "removeEventListener", "dispatchEvent", []);
-    },
-
-    // allow console.log
-    consoleLog: function() {
-      var overrideTest = new RegExp('console-log', 'i');
-      if (!window.console || overrideTest.test(document.querySelectorAll('html')[0].className)) {
-        window.console = {};
-        window.console.log = function() {
-          // if the reporting panel doesn't exist
-          var a, b, messages = '',
-            reportPanel = document.getElementById('reportPanel');
-          if (!reportPanel) {
-            // create the panel
-            reportPanel = document.createElement('DIV');
-            reportPanel.id = 'reportPanel';
-            reportPanel.style.background = '#fff none';
-            reportPanel.style.border = 'solid 1px #000';
-            reportPanel.style.color = '#000';
-            reportPanel.style.fontSize = '12px';
-            reportPanel.style.padding = '10px';
-            reportPanel.style.position = (navigator.userAgent.indexOf('MSIE 6') > -1) ? 'absolute' : 'fixed';
-            reportPanel.style.right = '10px';
-            reportPanel.style.bottom = '10px';
-            reportPanel.style.width = '180px';
-            reportPanel.style.height = '320px';
-            reportPanel.style.overflow = 'auto';
-            reportPanel.style.zIndex = '100000';
-            reportPanel.innerHTML = '&nbsp;';
-            // store a copy of this node in the move buffer
-            document.body.appendChild(reportPanel);
-          }
-          // truncate the queue
-          var reportString = (reportPanel.innerHTML.length < 1000) ? reportPanel.innerHTML : reportPanel.innerHTML.substring(0, 800);
-          // process the arguments
-          for (a = 0, b = arguments.length; a < b; a += 1) {
-            messages += arguments[a] + '<br/>';
-          }
-          // add a break after the message
-          messages += '<hr/>';
-          // output the queue to the panel
-          reportPanel.innerHTML = messages + reportString;
-        };
-      }
-    },
-
-    // allows Object.create (https://gist.github.com/rxgx/1597825)
-    objectCreate: function() {
-      if (typeof Object.create !== "function") {
-        Object.create = function(original) {
-          function Clone() {}
-          Clone.prototype = original;
-          return new Clone();
-        };
-      }
-    },
-
-    // allows String.trim (https://gist.github.com/eliperelman/1035982)
-    stringTrim: function() {
-      if (!String.prototype.trim) {
-        String.prototype.trim = function() {
-          return this.replace(/^[\s\uFEFF]+|[\s\uFEFF]+$/g, '');
-        };
-      }
-      if (!String.prototype.ltrim) {
-        String.prototype.ltrim = function() {
-          return this.replace(/^\s+/, '');
-        };
-      }
-      if (!String.prototype.rtrim) {
-        String.prototype.rtrim = function() {
-          return this.replace(/\s+$/, '');
-        };
-      }
-      if (!String.prototype.fulltrim) {
-        String.prototype.fulltrim = function() {
-          return this.replace(/(?:(?:^|\n)\s+|\s+(?:$|\n))/g, '').replace(/\s+/g, ' ');
-        };
-      }
-    },
-
-    // allows localStorage support
-    localStorage: function() {
-      if (!window.localStorage) {
-        if (/MSIE 8|MSIE 7|MSIE 6/i.test(navigator.userAgent)) {
-          window.localStorage = {
-            getItem: function(sKey) {
-              if (!sKey || !this.hasOwnProperty(sKey)) {
-                return null;
-              }
-              return unescape(document.cookie.replace(new RegExp("(?:^|.*;\\s*)" + escape(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"), "$1"));
-            },
-            key: function(nKeyId) {
-              return unescape(document.cookie.replace(/\s*\=(?:.(?!;))*$/, "").split(/\s*\=(?:[^;](?!;))*[^;]?;\s*/)[nKeyId]);
-            },
-            setItem: function(sKey, sValue) {
-              if (!sKey) {
-                return;
-              }
-              document.cookie = escape(sKey) + "=" + escape(sValue) + "; expires=Tue, 19 Jan 2038 03:14:07 GMT; path=/";
-              this.length = document.cookie.match(/\=/g).length;
-            },
-            length: 0,
-            removeItem: function(sKey) {
-              if (!sKey || !this.hasOwnProperty(sKey)) {
-                return;
-              }
-              document.cookie = escape(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-              this.length--;
-            },
-            hasOwnProperty: function(sKey) {
-              return (new RegExp("(?:^|;\\s*)" + escape(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
-            }
-          };
-          window.localStorage.length = (document.cookie.match(/\=/g) || window.localStorage).length;
-        } else {
-          Object.defineProperty(window, "localStorage", new(function() {
-            var aKeys = [],
-              oStorage = {};
-            Object.defineProperty(oStorage, "getItem", {
-              value: function(sKey) {
-                return sKey ? this[sKey] : null;
-              },
-              writable: false,
-              configurable: false,
-              enumerable: false
-            });
-            Object.defineProperty(oStorage, "key", {
-              value: function(nKeyId) {
-                return aKeys[nKeyId];
-              },
-              writable: false,
-              configurable: false,
-              enumerable: false
-            });
-            Object.defineProperty(oStorage, "setItem", {
-              value: function(sKey, sValue) {
-                if (!sKey) {
-                  return;
-                }
-                document.cookie = escape(sKey) + "=" + escape(sValue) + "; expires=Tue, 19 Jan 2038 03:14:07 GMT; path=/";
-              },
-              writable: false,
-              configurable: false,
-              enumerable: false
-            });
-            Object.defineProperty(oStorage, "length", {
-              get: function() {
-                return aKeys.length;
-              },
-              configurable: false,
-              enumerable: false
-            });
-            Object.defineProperty(oStorage, "removeItem", {
-              value: function(sKey) {
-                if (!sKey) {
-                  return;
-                }
-                document.cookie = escape(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-              },
-              writable: false,
-              configurable: false,
-              enumerable: false
-            });
-            this.get = function() {
-              var iThisIndx;
-              for (var sKey in oStorage) {
-                iThisIndx = aKeys.indexOf(sKey);
-                if (iThisIndx === -1) {
-                  oStorage.setItem(sKey, oStorage[sKey]);
-                } else {
-                  aKeys.splice(iThisIndx, 1);
-                }
-                delete oStorage[sKey];
-              }
-              for (aKeys; aKeys.length > 0; aKeys.splice(0, 1)) {
-                oStorage.removeItem(aKeys[0]);
-              }
-              for (var aCouple, iKey, nIdx = 0, aCouples = document.cookie.split(/\s*;\s*/); nIdx < aCouples.length; nIdx++) {
-                aCouple = aCouples[nIdx].split(/\s*=\s*/);
-                if (aCouple.length > 1) {
-                  oStorage[iKey = unescape(aCouple[0])] = unescape(aCouple[1]);
-                  aKeys.push(iKey);
-                }
-              }
-              return oStorage;
-            };
-            this.configurable = false;
-            this.enumerable = true;
-          })());
-        }
-      }
-    },
-
-    // allows bind support
-    functionBind: function() {
-      // Credit to Douglas Crockford for this bind method
-      if (!Function.prototype.bind) {
-        Function.prototype.bind = function(oThis) {
-          if (typeof this !== "function") {
-            // closest thing possible to the ECMAScript 5 internal IsCallable function
-            throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
-          }
-          var aArgs = Array.prototype.slice.call(arguments, 1),
-            fToBind = this,
-            fNOP = function() {},
-            fBound = function() {
-              return fToBind.apply(this instanceof fNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
-            };
-          fNOP.prototype = this.prototype;
-          fBound.prototype = new fNOP();
-          return fBound;
-        };
-      }
-    }
-
-  };
-
-  // startup
-  useful.polyfills.html5();
-  useful.polyfills.arrayIndexOf();
-  useful.polyfills.arrayIsArray();
-  useful.polyfills.arrayMap();
-  useful.polyfills.querySelectorAll();
-  useful.polyfills.addEventListener();
-  useful.polyfills.consoleLog();
-  useful.polyfills.objectCreate();
-  useful.polyfills.stringTrim();
-  useful.polyfills.localStorage();
-  useful.polyfills.functionBind();
-
-  // return as a require.js module
-  if (typeof module !== 'undefined') {
-    exports = module.exports = useful.polyfills;
-  }
-
-})();
-
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.urls.js: A library of useful functions to ease working with URL query parameters.", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// public object
-var useful = useful || {};
-
-(function(){
-
-	// Invoke strict mode
-	"use strict";
-
-	// Create a private object for this library
-	useful.urls = {
-
-		// retrieves the query parameters from an url
-		load : function (url) {
-			var a, b, parts = [], data = {}, namevalue, value;
-			parts = url.split('#')[0].replace('?', '&').split('&');
-			for (a = 1, b = parts.length; a < b; a += 1) {
-				namevalue = parts[a].split('=');
-				value = parseFloat(namevalue[1]);
-				data[namevalue[0]] = (!isNaN(value)) ? value : namevalue[1];
-			}
-			return data;
-		},
-
-		// stores query parameters to an url
-		save : function (url, data) {
-			var name;
-			// clean the url
-			url = url.split('?')[0].split('#')[0];
-			// for all name value pairs
-			for (name in data) {
-				if (data.hasOwnProperty(name)) {
-					// add them to the url
-					url += '&' + name + '=' + data[name];
-				}
-			}
-			// make sure the first value starts with a ?
-			return url.replace('&', '?');
-		},
-
-		// replace a value in a query parameter
-		replace : function (url, name, value) {
-			var old, match, nameValue;
-			// if the value is present in the url
-			match = new RegExp(name + '=', 'gi');
-			if (match.test(url)) {
-				// isolate the old value
-				old  = url.split('#')[0].split(name + '=')[1].split('&')[0];
-				// insert the new value
-				return url.replace(name + '=' + old, name + '=' + value);
-			} else {
-				// add the value instead of replacing it
-				nameValue = this.load(url);
-				nameValue[name] = value;
-				return this.save(url, nameValue);
-			}
-		},
-
-		// source - http://phpjs.org/functions/base64_encode/
-		// http://kevin.vanzonneveld.net
-		// +  original by: Tyler Akins (http://rumkin.com)
-		// +  improved by: Bayron Guevara
-		// +  improved by: Thunder.m
-		// +  improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-		// +  bugfixed by: Pellentesque Malesuada
-		// +  improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-		// +  improved by: Rafał Kukawski (http://kukawski.pl)
-		// *   example 1: base64_encode('Kevin van Zonneveld');
-		// *   returns 1: 'S2V2aW4gdmFuIFpvbm5ldmVsZA=='
-		encode : function (data) {
-			var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-			var o1, o2, o3, h1, h2, h3, h4, bits, i = 0,
-				ac = 0,
-				enc = "",
-				tmpArr = [];
-			if (!data) {
-				return data;
-			}
-			do { // pack three octets into four hexets
-				o1 = data.charCodeAt(i++);
-				o2 = data.charCodeAt(i++);
-				o3 = data.charCodeAt(i++);
-				bits = o1 << 16 | o2 << 8 | o3;
-				h1 = bits >> 18 & 0x3f;
-				h2 = bits >> 12 & 0x3f;
-				h3 = bits >> 6 & 0x3f;
-				h4 = bits & 0x3f;
-				// use hexets to index into b64, and append result to encoded string
-				tmpArr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
-			} while (i < data.length);
-			enc = tmpArr.join('');
-			var r = data.length % 3;
-			return (r ? enc.slice(0, r - 3) : enc) + '==='.slice(r || 3);
-		},
-
-		// source - http://phpjs.org/functions/base64_decode/
-		// http://kevin.vanzonneveld.net
-		// +  original by: Tyler Akins (http://rumkin.com)
-		// +  improved by: Thunder.m
-		// +   input by: Aman Gupta
-		// +  improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-		// +  bugfixed by: Onno Marsman
-		// +  bugfixed by: Pellentesque Malesuada
-		// +  improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-		// +   input by: Brett Zamir (http://brett-zamir.me)
-		// +  bugfixed by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-		// *   example 1: base64_decode('S2V2aW4gdmFuIFpvbm5ldmVsZA==');
-		// *   returns 1: 'Kevin van Zonneveld'
-		decode : function (data) {
-			var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-			var o1, o2, o3, h1, h2, h3, h4, bits, i = 0,
-				ac = 0,
-				dec = "",
-				tmpArr = [];
-			if (!data) {
-				return data;
-			}
-			data += '';
-			do { // unpack four hexets into three octets using index points in b64
-				h1 = b64.indexOf(data.charAt(i++));
-				h2 = b64.indexOf(data.charAt(i++));
-				h3 = b64.indexOf(data.charAt(i++));
-				h4 = b64.indexOf(data.charAt(i++));
-				bits = h1 << 18 | h2 << 12 | h3 << 6 | h4;
-				o1 = bits >> 16 & 0xff;
-				o2 = bits >> 8 & 0xff;
-				o3 = bits & 0xff;
-				if (h3 == 64) {
-					tmpArr[ac++] = String.fromCharCode(o1);
-				} else if (h4 == 64) {
-					tmpArr[ac++] = String.fromCharCode(o1, o2);
-				} else {
-					tmpArr[ac++] = String.fromCharCode(o1, o2, o3);
-				}
-			} while (i < data.length);
-			dec = tmpArr.join('');
-			return dec;
-		}
-
-	};
-
-	// return as a require.js module
-	if (typeof module !== 'undefined') {
-		exports = module.exports = useful.urls;
-	}
-
-})();
-
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Cropper = useful.Cropper || function () {};
-
-// extend the constructor
-useful.Cropper.prototype.Busy = function (parent) {
+// extend the class
+Cropper.prototype.Busy = function (parent) {
 
 	// PROPERTIES
-	
-	"use strict";
+
 	this.parent = parent;
 	this.config = parent.config;
 
 	// METHODS
-	
+
 	this.init = function () {
 		var config = this.config;
 		// add a busy message
@@ -1249,46 +786,31 @@ useful.Cropper.prototype.Busy = function (parent) {
 		// return the object
 		return this;
 	};
-	
+
 	this.show = function () {
 		// show the busy message
 		this.spinner.style.visibility = 'visible';
 	};
-	
+
 	this.hide = function () {
 		// show the busy message
 		this.spinner.style.visibility = 'hidden';
 	};
+
+	this.init();
+	
 };
 
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Cropper.Busy;
-}
-
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Cropper = useful.Cropper || function () {};
-
-// extend the constructor
-useful.Cropper.prototype.Handles = function (parent) {
+// extend the class
+Cropper.prototype.Handles = function (parent) {
 
 	// PROPERTIES
-	
-	"use strict";
+
 	this.parent = parent;
 	this.config = parent.config;
 
 	// METHODS
-	
+
 	this.init = function () {
 		var config = this.config;
 		var a, b, name;
@@ -1303,7 +825,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 		// return the object
 		return this;
 	};
-	
+
 	this.left = function (distance) {
 		var config = this.config;
 		var horizontal, left, right, limit;
@@ -1319,7 +841,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 			config.left = left;
 		}
 	};
-	
+
 	this.top = function (distance) {
 		var config = this.config;
 		var vertical, top, bottom, limit;
@@ -1335,7 +857,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 			config.top = top;
 		}
 	};
-	
+
 	this.right = function (distance) {
 		var config = this.config;
 		var horizontal, left, right, limit;
@@ -1351,7 +873,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 			config.right = right;
 		}
 	};
-	
+
 	this.bottom = function (distance) {
 		var config = this.config;
 		var vertical, top, bottom, limit;
@@ -1367,37 +889,22 @@ useful.Cropper.prototype.Handles = function (parent) {
 			config.bottom = bottom;
 		}
 	};
+
+	this.init();
+	
 };
 
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Cropper.Indicator.Handles;
-}
-
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Cropper = useful.Cropper || function () {};
-
-// extend the constructor
-useful.Cropper.prototype.Indicator = function (parent) {
+// extend the class
+Cropper.prototype.Indicator = function (parent) {
 
 	// PROPERTIES
-	
-	"use strict";
+
 	this.parent = parent;
 	this.config = parent.config;
 	this.context = parent.context;
 
 	// METHODS
-	
+
 	this.init = function () {
 		var config = this.config;
 		// create the indicator
@@ -1405,12 +912,12 @@ useful.Cropper.prototype.Indicator = function (parent) {
 		config.overlay.className = 'cr-overlay';
 		config.overlay.style.background = 'url(' + config.image.src + ')';
 		// create the handles
-		this.handles = new this.context.Handles(this).init();
+		this.handles = new this.context.Handles(this);
 		// add the indicator to the parent
 		config.element.appendChild(config.overlay);
 		// add the interaction
 		var _this = this;
-		var gestures = new useful.Gestures().init({
+		var gestures = new Gestures({
 			'element' : config.overlay.parentNode,
 			'threshold' : 50,
 			'increment' : 0.1,
@@ -1464,7 +971,7 @@ useful.Cropper.prototype.Indicator = function (parent) {
 		// return the object
 		return this;
 	};
-	
+
 	this.update = function () {
 		var config = this.config;
 		var left, top, right, bottom;
@@ -1484,7 +991,7 @@ useful.Cropper.prototype.Indicator = function (parent) {
 		// reposition the background image
 		config.overlay.style.backgroundPosition = '-' + left + 'px -' + top + 'px';
 	};
-	
+
 	this.move = function (x, y) {
 		var config = this.config;
 		var horizontal, vertical, left, top, right, bottom;
@@ -1505,31 +1012,16 @@ useful.Cropper.prototype.Indicator = function (parent) {
 			config.bottom = bottom;
 		}
 	};
+
+	this.init();
+
 };
 
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Cropper.Indicator;
-}
-
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Cropper = useful.Cropper || function () {};
-
-// extend the constructor
-useful.Cropper.prototype.Main = function (config, context) {
+// extend the class
+Cropper.prototype.Main = function (config, context) {
 
 	// PROPERTIES
-	
-	"use strict";
+
 	this.config = config;
 	this.context = context;
 	this.config.names = ['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'];
@@ -1547,13 +1039,13 @@ useful.Cropper.prototype.Main = function (config, context) {
 	this.config.reset = [config.left, config.top, config.right, config.bottom];
 
 	// COMPONENTS
-	
-	this.busy = new this.context.Busy(this).init();
-	this.indicator = new this.context.Indicator(this).init();
-	this.toolbar = new this.context.Toolbar(this).init();
+
+	this.busy = new this.context.Busy(this);
+	this.indicator = new this.context.Indicator(this);
+	this.toolbar = new this.context.Toolbar(this);
 
 	// METHODS
-	
+
 	this.init = function () {
 		var config = this.config;
 		// if the image has loaded
@@ -1574,13 +1066,13 @@ useful.Cropper.prototype.Main = function (config, context) {
 		// return the object
 		return this;
 	};
-	
+
 	this.preset = function () {
 		var query, width, height, aspect, config = this.config;
 		// if there's anything to measure yet
 		if (config.image.offsetWidth) {
 			// retrieve the crop coordinates from the url
-			query = useful.urls.load(config.url);
+			query = urls.load(config.url);
 			// if we started out with a cropped image
 			if (query.left > 0 || query.top > 0 || query.right < 1 || query.bottom < 1) {
 				// validate the input
@@ -1604,12 +1096,12 @@ useful.Cropper.prototype.Main = function (config, context) {
 				config.image.style.maxWidth = width + 'px';
 				config.image.style.maxHeight = height + 'px';
 				// guess what the reset url of the uncropped image might have been
-				config.url = useful.urls.replace(config.url, 'width', width);
-				config.url = useful.urls.replace(config.url, 'height', height);
-				config.url = useful.urls.replace(config.url, 'left', 0);
-				config.url = useful.urls.replace(config.url, 'top', 0);
-				config.url = useful.urls.replace(config.url, 'right', 1);
-				config.url = useful.urls.replace(config.url, 'bottom', 1);
+				config.url = urls.replace(config.url, 'width', width);
+				config.url = urls.replace(config.url, 'height', height);
+				config.url = urls.replace(config.url, 'left', 0);
+				config.url = urls.replace(config.url, 'top', 0);
+				config.url = urls.replace(config.url, 'right', 1);
+				config.url = urls.replace(config.url, 'bottom', 1);
 				// restore the container's original size
 				config.element.style.width = width + 'px';
 				config.element.style.height = height + 'px';
@@ -1630,7 +1122,7 @@ useful.Cropper.prototype.Main = function (config, context) {
 			}
 		}
 	};
-	
+
 	this.correct = function (handle) {
 		var config = this.config;
 		// determine the dominant motion
@@ -1671,7 +1163,7 @@ useful.Cropper.prototype.Main = function (config, context) {
 				break;
 		}
 	};
-	
+
 	this.update = function (values, changed, handle) {
 		var config = this.config;
 		changed = (changed === true);
@@ -1705,44 +1197,31 @@ useful.Cropper.prototype.Main = function (config, context) {
 			}, config.delay);
 		}
 	};
+
+	// EVENTS
+
+	this.init();
+
 };
 
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Cropper.Main;
-}
-
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Cropper = useful.Cropper || function () {};
-
-// extend the constructor
-useful.Cropper.prototype.Toolbar = function (parent) {
+// extend the class
+Cropper.prototype.Toolbar = function (parent) {
 
 	// PROPERTIES
-	
-	"use strict";
+
 	this.parent = parent;
 	this.config = parent.config;
 	this.ui = {};
 
 	// METHODS
-	
+
 	this.init = function () {
 		// build the toolbar
 		if (!this.config.realtime) { this.build(); }
 		// return the object
 		return this;
 	};
-	
+
 	this.build = function () {
 		var config = this.config;
 		var _this = this;
@@ -1769,7 +1248,7 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 		// add the toolbar
 		config.element.appendChild(config.toolbar);
 	};
-	
+
 	this.apply = function () {
 		var config = this.config;
 		// if the apply button is enabled
@@ -1804,13 +1283,13 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 			height = Math.round(height);
 			// replace the image with a cropped version
 			src = config.image.src;
-			src = useful.urls.replace(src, 'width', width);
-			src = useful.urls.replace(src, 'height', height);
-			src = useful.urls.replace(src, 'left', config.left);
-			src = useful.urls.replace(src, 'top', config.top);
-			src = useful.urls.replace(src, 'right', config.right);
-			src = useful.urls.replace(src, 'bottom', config.bottom);
-			src = useful.urls.replace(src, 'time', new Date().getTime());
+			src = urls.replace(src, 'width', width);
+			src = urls.replace(src, 'height', height);
+			src = urls.replace(src, 'left', config.left);
+			src = urls.replace(src, 'top', config.top);
+			src = urls.replace(src, 'right', config.right);
+			src = urls.replace(src, 'bottom', config.bottom);
+			src = urls.replace(src, 'time', new Date().getTime());
 			config.image.src = src;
 			// disable the indicator
 			config.applyButton.disabled = true;
@@ -1821,7 +1300,7 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 		// cancel the click
 		return false;
 	};
-	
+
 	this.reset = function () {
 		var config = this.config;
 		var _this = this;
@@ -1845,7 +1324,7 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 			_this.parent.busy.hide();
 		};
 		// replace the image with an uncropped version
-		config.url = useful.urls.replace(config.url, 'name', new Date().getTime());
+		config.url = urls.replace(config.url, 'name', new Date().getTime());
 		config.image.src =  config.url;
 		config.overlay.style.backgroundImage = 'url(' + config.url + ')';
 		// trigger any external onchange event
@@ -1853,63 +1332,6 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 		// cancel the click
 		return false;
 	};
+
+	this.init();
 };
-
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Cropper.Toolbar;
-}
-
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.photowall.js: Simple photo wall", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Cropper = useful.Cropper || function () {};
-
-// extend the constructor
-useful.Cropper.prototype.init = function (config) {
-
-	// PROPERTIES
-	
-	"use strict";
-
-	// METHODS
-	
-	this.only = function (config) {
-		// start an instance of the script
-		return new this.Main(config, this).init();
-	};
-	
-	this.each = function (config) {
-		var _config, _context = this, instances = [];
-		// for all element
-		for (var a = 0, b = config.elements.length; a < b; a += 1) {
-			// clone the configuration
-			_config = Object.create(config);
-			// insert the current element
-			_config.element = config.elements[a];
-			// delete the list of elements from the clone
-			delete _config.elements;
-			// start a new instance of the object
-			instances[a] = new this.Main(_config, _context).init();
-		}
-		// return the instances
-		return instances;
-	};
-
-	// START
-
-	return (config.elements) ? this.each(config) : this.only(config);
-
-};
-
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Cropper;
-}

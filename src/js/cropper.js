@@ -1,29 +1,19 @@
 /*
 	Source:
-	van Creij, Maurice (2014). "useful.gestures.js: A library of useful functions to ease working with touch and gestures.", version 20141127, http://www.woollymittens.nl/.
+	van Creij, Maurice (2018). "photowall.js: Simple photo wall", http://www.woollymittens.nl/.
 
 	License:
 	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
 */
 
-// create the constructor if needed
-var useful = useful || {};
-useful.Gestures = useful.Gestures || function () {};
+// establish the class
+var Cropper = function (config) {
 
-// extend the constructor
-useful.Gestures.prototype.init = function (config) {
-
-	// PROPERTIES
-	
-	"use strict";
-
-	// METHODS
-	
 	this.only = function (config) {
 		// start an instance of the script
-		return new this.Main(config, this).init();
+		return new this.Main(config, this);
 	};
-	
+
 	this.each = function (config) {
 		var _config, _context = this, instances = [];
 		// for all element
@@ -32,16 +22,12 @@ useful.Gestures.prototype.init = function (config) {
 			_config = Object.create(config);
 			// insert the current element
 			_config.element = config.elements[a];
-			// delete the list of elements from the clone
-			delete _config.elements;
 			// start a new instance of the object
-			instances[a] = new this.Main(_config, _context).init();
+			instances[a] = new this.Main(_config, _context);
 		}
 		// return the instances
 		return instances;
 	};
-
-	// START
 
 	return (config.elements) ? this.each(config) : this.only(config);
 
@@ -49,5 +35,5 @@ useful.Gestures.prototype.init = function (config) {
 
 // return as a require.js module
 if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Gestures;
+	exports = module.exports = Cropper;
 }

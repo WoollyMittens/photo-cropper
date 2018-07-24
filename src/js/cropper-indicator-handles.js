@@ -1,26 +1,13 @@
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Cropper = useful.Cropper || function () {};
-
-// extend the constructor
-useful.Cropper.prototype.Handles = function (parent) {
+// extend the class
+Cropper.prototype.Handles = function (parent) {
 
 	// PROPERTIES
-	
-	"use strict";
+
 	this.parent = parent;
 	this.config = parent.config;
 
 	// METHODS
-	
+
 	this.init = function () {
 		var config = this.config;
 		var a, b, name;
@@ -35,7 +22,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 		// return the object
 		return this;
 	};
-	
+
 	this.left = function (distance) {
 		var config = this.config;
 		var horizontal, left, right, limit;
@@ -51,7 +38,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 			config.left = left;
 		}
 	};
-	
+
 	this.top = function (distance) {
 		var config = this.config;
 		var vertical, top, bottom, limit;
@@ -67,7 +54,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 			config.top = top;
 		}
 	};
-	
+
 	this.right = function (distance) {
 		var config = this.config;
 		var horizontal, left, right, limit;
@@ -83,7 +70,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 			config.right = right;
 		}
 	};
-	
+
 	this.bottom = function (distance) {
 		var config = this.config;
 		var vertical, top, bottom, limit;
@@ -99,9 +86,7 @@ useful.Cropper.prototype.Handles = function (parent) {
 			config.bottom = bottom;
 		}
 	};
-};
 
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Cropper.Indicator.Handles;
-}
+	this.init();
+	
+};

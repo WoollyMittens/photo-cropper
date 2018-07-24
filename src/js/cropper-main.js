@@ -1,21 +1,8 @@
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Cropper = useful.Cropper || function () {};
-
-// extend the constructor
-useful.Cropper.prototype.Main = function (config, context) {
+// extend the class
+Cropper.prototype.Main = function (config, context) {
 
 	// PROPERTIES
-	
-	"use strict";
+
 	this.config = config;
 	this.context = context;
 	this.config.names = ['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'];
@@ -33,13 +20,13 @@ useful.Cropper.prototype.Main = function (config, context) {
 	this.config.reset = [config.left, config.top, config.right, config.bottom];
 
 	// COMPONENTS
-	
-	this.busy = new this.context.Busy(this).init();
-	this.indicator = new this.context.Indicator(this).init();
-	this.toolbar = new this.context.Toolbar(this).init();
+
+	this.busy = new this.context.Busy(this);
+	this.indicator = new this.context.Indicator(this);
+	this.toolbar = new this.context.Toolbar(this);
 
 	// METHODS
-	
+
 	this.init = function () {
 		var config = this.config;
 		// if the image has loaded
@@ -60,13 +47,13 @@ useful.Cropper.prototype.Main = function (config, context) {
 		// return the object
 		return this;
 	};
-	
+
 	this.preset = function () {
 		var query, width, height, aspect, config = this.config;
 		// if there's anything to measure yet
 		if (config.image.offsetWidth) {
 			// retrieve the crop coordinates from the url
-			query = useful.urls.load(config.url);
+			query = urls.load(config.url);
 			// if we started out with a cropped image
 			if (query.left > 0 || query.top > 0 || query.right < 1 || query.bottom < 1) {
 				// validate the input
@@ -90,12 +77,12 @@ useful.Cropper.prototype.Main = function (config, context) {
 				config.image.style.maxWidth = width + 'px';
 				config.image.style.maxHeight = height + 'px';
 				// guess what the reset url of the uncropped image might have been
-				config.url = useful.urls.replace(config.url, 'width', width);
-				config.url = useful.urls.replace(config.url, 'height', height);
-				config.url = useful.urls.replace(config.url, 'left', 0);
-				config.url = useful.urls.replace(config.url, 'top', 0);
-				config.url = useful.urls.replace(config.url, 'right', 1);
-				config.url = useful.urls.replace(config.url, 'bottom', 1);
+				config.url = urls.replace(config.url, 'width', width);
+				config.url = urls.replace(config.url, 'height', height);
+				config.url = urls.replace(config.url, 'left', 0);
+				config.url = urls.replace(config.url, 'top', 0);
+				config.url = urls.replace(config.url, 'right', 1);
+				config.url = urls.replace(config.url, 'bottom', 1);
 				// restore the container's original size
 				config.element.style.width = width + 'px';
 				config.element.style.height = height + 'px';
@@ -116,7 +103,7 @@ useful.Cropper.prototype.Main = function (config, context) {
 			}
 		}
 	};
-	
+
 	this.correct = function (handle) {
 		var config = this.config;
 		// determine the dominant motion
@@ -157,7 +144,7 @@ useful.Cropper.prototype.Main = function (config, context) {
 				break;
 		}
 	};
-	
+
 	this.update = function (values, changed, handle) {
 		var config = this.config;
 		changed = (changed === true);
@@ -191,9 +178,9 @@ useful.Cropper.prototype.Main = function (config, context) {
 			}, config.delay);
 		}
 	};
-};
 
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Cropper.Main;
-}
+	// EVENTS
+
+	this.init();
+
+};

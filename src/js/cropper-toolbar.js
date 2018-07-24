@@ -1,34 +1,21 @@
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Cropper = useful.Cropper || function () {};
-
-// extend the constructor
-useful.Cropper.prototype.Toolbar = function (parent) {
+// extend the class
+Cropper.prototype.Toolbar = function (parent) {
 
 	// PROPERTIES
-	
-	"use strict";
+
 	this.parent = parent;
 	this.config = parent.config;
 	this.ui = {};
 
 	// METHODS
-	
+
 	this.init = function () {
 		// build the toolbar
 		if (!this.config.realtime) { this.build(); }
 		// return the object
 		return this;
 	};
-	
+
 	this.build = function () {
 		var config = this.config;
 		var _this = this;
@@ -55,7 +42,7 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 		// add the toolbar
 		config.element.appendChild(config.toolbar);
 	};
-	
+
 	this.apply = function () {
 		var config = this.config;
 		// if the apply button is enabled
@@ -90,13 +77,13 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 			height = Math.round(height);
 			// replace the image with a cropped version
 			src = config.image.src;
-			src = useful.urls.replace(src, 'width', width);
-			src = useful.urls.replace(src, 'height', height);
-			src = useful.urls.replace(src, 'left', config.left);
-			src = useful.urls.replace(src, 'top', config.top);
-			src = useful.urls.replace(src, 'right', config.right);
-			src = useful.urls.replace(src, 'bottom', config.bottom);
-			src = useful.urls.replace(src, 'time', new Date().getTime());
+			src = urls.replace(src, 'width', width);
+			src = urls.replace(src, 'height', height);
+			src = urls.replace(src, 'left', config.left);
+			src = urls.replace(src, 'top', config.top);
+			src = urls.replace(src, 'right', config.right);
+			src = urls.replace(src, 'bottom', config.bottom);
+			src = urls.replace(src, 'time', new Date().getTime());
 			config.image.src = src;
 			// disable the indicator
 			config.applyButton.disabled = true;
@@ -107,7 +94,7 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 		// cancel the click
 		return false;
 	};
-	
+
 	this.reset = function () {
 		var config = this.config;
 		var _this = this;
@@ -131,7 +118,7 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 			_this.parent.busy.hide();
 		};
 		// replace the image with an uncropped version
-		config.url = useful.urls.replace(config.url, 'name', new Date().getTime());
+		config.url = urls.replace(config.url, 'name', new Date().getTime());
 		config.image.src =  config.url;
 		config.overlay.style.backgroundImage = 'url(' + config.url + ')';
 		// trigger any external onchange event
@@ -139,9 +126,6 @@ useful.Cropper.prototype.Toolbar = function (parent) {
 		// cancel the click
 		return false;
 	};
-};
 
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Cropper.Toolbar;
-}
+	this.init();
+};

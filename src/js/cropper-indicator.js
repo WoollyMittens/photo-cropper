@@ -1,27 +1,14 @@
-/*
-	Source:
-	van Creij, Maurice (2014). "useful.cropper.js: A simple image cropper", version 20141127, http://www.woollymittens.nl/.
-
-	License:
-	This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-*/
-
-// create the constructor if needed
-var useful = useful || {};
-useful.Cropper = useful.Cropper || function () {};
-
-// extend the constructor
-useful.Cropper.prototype.Indicator = function (parent) {
+// extend the class
+Cropper.prototype.Indicator = function (parent) {
 
 	// PROPERTIES
-	
-	"use strict";
+
 	this.parent = parent;
 	this.config = parent.config;
 	this.context = parent.context;
 
 	// METHODS
-	
+
 	this.init = function () {
 		var config = this.config;
 		// create the indicator
@@ -29,12 +16,12 @@ useful.Cropper.prototype.Indicator = function (parent) {
 		config.overlay.className = 'cr-overlay';
 		config.overlay.style.background = 'url(' + config.image.src + ')';
 		// create the handles
-		this.handles = new this.context.Handles(this).init();
+		this.handles = new this.context.Handles(this);
 		// add the indicator to the parent
 		config.element.appendChild(config.overlay);
 		// add the interaction
 		var _this = this;
-		var gestures = new useful.Gestures().init({
+		var gestures = new Gestures({
 			'element' : config.overlay.parentNode,
 			'threshold' : 50,
 			'increment' : 0.1,
@@ -88,7 +75,7 @@ useful.Cropper.prototype.Indicator = function (parent) {
 		// return the object
 		return this;
 	};
-	
+
 	this.update = function () {
 		var config = this.config;
 		var left, top, right, bottom;
@@ -108,7 +95,7 @@ useful.Cropper.prototype.Indicator = function (parent) {
 		// reposition the background image
 		config.overlay.style.backgroundPosition = '-' + left + 'px -' + top + 'px';
 	};
-	
+
 	this.move = function (x, y) {
 		var config = this.config;
 		var horizontal, vertical, left, top, right, bottom;
@@ -129,9 +116,7 @@ useful.Cropper.prototype.Indicator = function (parent) {
 			config.bottom = bottom;
 		}
 	};
-};
 
-// return as a require.js module
-if (typeof module !== 'undefined') {
-	exports = module.exports = useful.Cropper.Indicator;
-}
+	this.init();
+
+};
