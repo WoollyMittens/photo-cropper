@@ -34,5 +34,5 @@ var Cropper = function (config) {
 };
 
 // return as a require.js module
-if (typeof define != 'undefined') define(['cropper'], function () { return Cropper });
+if (typeof define != 'undefined') define([], function () { return Cropper });
 if (typeof module != 'undefined') module.exports = Cropper;
