@@ -53,7 +53,7 @@ var cropper = new Cropper({
 	'delay' : 1000,
 	'realtime' : false,
 	'offset' : 2,
-	'slice' : 'php/imageslice.php?src=../{src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
+	'slice' : 'php/imageslice.php?src={src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
 });
 ```
 
