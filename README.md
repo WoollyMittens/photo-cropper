@@ -4,6 +4,10 @@ TODO: convert to modular/class based javascript
 
 A visual touch interface for generating cropping coordinates.
 
+## Example
+
+https://woollymittens.github.io/photo-cropper/
+
 ## How to include the script
 
 The stylesheet is best included in the header of the document.
