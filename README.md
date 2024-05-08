@@ -1,7 +1,5 @@
 # cropper.js: A simple image cropper
 
-TODO: convert to modular/class based javascript
-
 A visual touch interface for generating cropping coordinates.
 
 ## Example
@@ -10,54 +8,35 @@ https://woollymittens.github.io/photo-cropper/
 
 ## How to include the script
 
-The stylesheet is best included in the header of the document.
+The includes can be added to the HTML document:
 
 ```html
-<link rel="stylesheet" href="css/cropper.css"/>
+<link rel="stylesheet" href="css/photo-cropper.css"/>
+<script src="js/photo-cropper.js" type="module"></script>
 ```
 
-This include can be added to the header or placed inline before the script is invoked.
-
-```html
-<script src="lib/gestures.js"></script>
-<script src="lib/urls.js"></script>
-<script src="js/cropper.js"></script>
-```
-
-Or use [Require.js](https://requirejs.org/).
+Or as a [Javascript module](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules):
 
 ```js
-requirejs([
-	'lib/gestures.js',
-	'lib/urls.js',
-	'js/cropper.js'
-], function(Gestures, urls, Cropper) {
-	...
-});
-```
-
-Or use imported as a component in existing projects.
-
-```js
-@import {Cropper} from "js/cropper.js');
+@import { Cropper } from "./js/cropper.js');
 ``
 
 ## How to start the script
 
 ```javascript
-var cropper = new Cropper({
-	'element' : document.getElementById('id'),
-	'left' : 0.1,
-	'top' : 0.1,
-	'right' : 0.9,
-	'bottom' : 0.9,
-	'minimum' : 0.2,
-	'aspect' : 0.75,
-	'onchange' : function(){},
-	'delay' : 1000,
-	'realtime' : false,
-	'offset' : 2,
-	'slice' : 'php/imageslice.php?src={src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
+var cropper = new PhotoCropper({
+  'element' : document.getElementById('id'),
+  'left' : 0.1,
+  'top' : 0.1,
+  'right' : 0.9,
+  'bottom' : 0.9,
+  'minimum' : 0.2,
+  'aspect' : 0.75,
+  'onchange' : function(){},
+  'delay' : 1000,
+  'realtime' : false,
+  'offset' : 2,
+  'slice' : 'php/imageslice.php?src={src}&width={width}&height={height}&left={left}&top={top}&right={right}&bottom={bottom}'
 });
 ```
 
